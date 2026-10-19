@@ -98,6 +98,6 @@ python3 scripts/prepare_release.py lumoz-desktop-v0.1.0
 - Official MCP Registry publication, PyPI publication, and hosted MCP deployment
   are separate operations, not performed by this release workflow.
 
-The release workflow is implemented; publishing a component release still
-needs verification on GitHub. Directory submissions, feed registration,
+The first `0.1.0` release of each component was published successfully through
+the GitHub release workflow. Directory submissions, feed registration,
 signing, and live GUI acceptance tests remain pending.

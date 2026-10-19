@@ -44,6 +44,7 @@ skill. The root repository is no longer an installable plugin.
   plugin versions do not change Desktop metadata.
 - Strict Claude marketplace/plugin validation and official MCPB validation.
 - Release tag-to-component/version validation, selected-asset publication.
+- Successful GitHub workflow publication of all three `0.1.0` distributions.
 - Pre-commit Gitleaks hook, CI history scanning, and repository-wide GitHub
   secret scanning and push protection. See [contributing](contributing.md).
 - Earlier Linux MCPB startup test initialized and discovered 27 tools using
@@ -57,8 +58,8 @@ provenance. `list_apps` is the preferred first read-only API smoke test.
 
 1. Test Windows/macOS GUI installation, API-key persistence, restart, and an
    authenticated read. Verify Desktop managed uv support and Cowork separately.
-2. Test component release publishing on GitHub. Package validation alone does
-   not establish a published release or directory listing.
+2. Verify customer upgrade behavior for later component releases. GitHub
+   release publication alone does not establish a directory listing.
 3. Retire the old combined plugin installation source in the server repository;
    this reorganization does not change files or publish PyPI releases there.
 4. Submit plugin folders individually and the MCPB through its separate route.

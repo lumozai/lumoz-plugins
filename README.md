@@ -42,13 +42,14 @@ third-party marketplace auto-update is off by default.
 
 1. Install **Lumoz Skills** through **Customize → Plugins** from the Lumoz
    marketplace/directory when available. Do not install the CLI MCP plugin here.
-2. For MCP tools, build `lumoz.mcpb` using the command below, then open
+2. For MCP tools, [download `lumoz.mcpb`](https://github.com/lumozai/lumoz-plugins/releases/latest/download/lumoz.mcpb), then open
    **Settings → Extensions → Advanced settings → Install Extension…** and
-   select `dist/lumoz.mcpb`.
+   select the downloaded file.
 3. Enter the full API key in the extension form and start a new Chat. Ask:
    **Use Lumoz to list the apps and environments I can access.**
 
 ```sh
+# Optional: build the extension from a source checkout
 python3 scripts/build_mcpb.py
 ```
 
