@@ -1,0 +1,60 @@
+{
+  "manifest_version": "0.4",
+  "name": "lumoz",
+  "display_name": "Lumoz",
+  "version": "0.1.0",
+  "description": "Investigate Lumoz traces, signals, problems, and root cause analyses.",
+  "author": {
+    "name": "Lumoz AI",
+    "email": "support@lumoz.ai",
+    "url": "https://lumoz.ai"
+  },
+  "homepage": "https://lumoz.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lumozai/lumoz-plugins"
+  },
+  "support": "https://github.com/lumozai/lumoz-plugins/issues",
+  "license": "Apache-2.0",
+  "server": {
+    "type": "uv",
+    "entry_point": "server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "--no-dev",
+        "server.py"
+      ],
+      "env": {
+        "LUMOZ_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32"
+    ],
+    "runtimes": {
+      "python": ">=3.11"
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Lumoz API key",
+      "description": "API key from Lumoz Console, in client_id:client_secret format.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "keywords": [
+    "lumoz",
+    "observability",
+    "rca",
+    "evals"
+  ]
+}

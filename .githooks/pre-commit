@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+if command -v gitleaks >/dev/null 2>&1; then
+    scanner=gitleaks
+elif [ -x .tools/bin/gitleaks ]; then
+    scanner=.tools/bin/gitleaks
+else
+    echo 'Gitleaks is required to commit. See docs/contributing.md for installation.' >&2
+    exit 1
+fi
+
+exec "$scanner" git --pre-commit --staged --redact --no-banner

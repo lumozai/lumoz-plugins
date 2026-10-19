@@ -1,0 +1,79 @@
+name: Validate packages
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pinned Gitleaks binary
+        env:
+          GITLEAKS_VERSION: '8.30.1'
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl --fail --silent --show-error --location "$base/$archive" --output "$RUNNER_TEMP/$archive"
+          curl --fail --silent --show-error --location "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt" --output "$RUNNER_TEMP/checksums.txt"
+          cd "$RUNNER_TEMP"
+          grep " $archive\$" checksums.txt | sha256sum --check --strict
+          tar -xzf "$archive" gitleaks
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Scan all fetched history
+        run: gitleaks git --redact --no-banner --log-opts="--all"
+
+  package:
+    needs: secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check generated manifests
+        run: |
+          python3 scripts/build_claude.py --check
+          python3 scripts/build_mcpb.py --check
+      - name: Check packaging boundaries
+        run: python3 -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install tested Claude Code validator
+        run: npm install --global @anthropic-ai/claude-code@2.1.302
+      - name: Validate Claude marketplace and plugins
+        run: |
+          claude plugin validate . --strict
+          claude plugin validate plugins/lumoz-skills --strict
+          claude plugin validate plugins/lumoz-mcp --strict
+      - name: Build plugin trial ZIPs
+        run: python3 scripts/build_claude.py --zip
+      - name: Check ZIP integrity
+        run: |
+          python3 -m zipfile --test dist/lumoz-skills-*.zip
+          python3 -m zipfile --test dist/lumoz-mcp-*.zip
+      - name: Build and validate Desktop extension
+        run: |
+          python3 scripts/build_mcpb.py
+          npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb/manifest.json
+          python3 -m zipfile --test dist/lumoz.mcpb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lumoz-claude-plugins
+          path: dist/*.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lumoz-desktop-extension
+          path: dist/*.mcpb
+          if-no-files-found: error

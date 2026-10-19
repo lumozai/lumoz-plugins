@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "lumoz": {
+      "command": "${user_config.uvx_path}",
+      "args": [
+        "--from",
+        "lumoz-mcp==0.4.3",
+        "lumoz-mcp"
+      ],
+      "env": {
+        "LUMOZ_API_KEY": "${user_config.api_key}"
+      }
+    }
+  }
+}

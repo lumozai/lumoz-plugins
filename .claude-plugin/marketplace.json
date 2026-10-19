@@ -1,0 +1,21 @@
+{
+  "name": "lumoz",
+  "owner": {
+    "name": "Lumoz AI",
+    "email": "support@lumoz.ai",
+    "url": "https://lumoz.ai"
+  },
+  "description": "Lumoz skills for Claude and a separate MCP integration for Claude Code.",
+  "plugins": [
+    {
+      "name": "lumoz-skills",
+      "source": "./plugins/lumoz-skills",
+      "description": "Create regression evals from Lumoz eval suggestions using your project's test framework."
+    },
+    {
+      "name": "lumoz-mcp",
+      "source": "./plugins/lumoz-mcp",
+      "description": "Connect Claude Code to Lumoz traces, signals, problems, RCAs, and eval suggestions."
+    }
+  ]
+}

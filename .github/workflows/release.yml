@@ -1,0 +1,47 @@
+name: Release a distribution package
+
+on:
+  push:
+    tags:
+      - 'lumoz-skills-v*'
+      - 'lumoz-mcp-v*'
+      - 'lumoz-desktop-v*'
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/validate.yml
+
+  publish:
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: lumoz-*
+          merge-multiple: true
+          path: dist
+      - name: Verify tag, artifact, and published server dependency
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 scripts/prepare_release.py "$RELEASE_TAG" --verify-pypi --github-output "$GITHUB_OUTPUT"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_ASSET: ${{ steps.release.outputs.asset }}
+          RELEASE_TITLE: ${{ steps.release.outputs.title }}
+          RELEASE_LATEST: ${{ steps.release.outputs.latest }}
+        run: |
+          gh release create "$RELEASE_TAG" "$RELEASE_ASSET" \
+            --title "$RELEASE_TITLE" --notes-file dist/release-notes.md \
+            --verify-tag --latest="$RELEASE_LATEST"
