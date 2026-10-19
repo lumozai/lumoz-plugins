@@ -9,7 +9,7 @@ publication status before advertising its listing.
 
 | Destination | What it provides | Required deliverable |
 | --- | --- | --- |
-| PyPI | Downloadable Python server | Versioned `lumoz-mcp` package; 0.4.3 verified available |
+| PyPI | Downloadable Python server | Published, versioned `lumoz-mcp` package |
 | Official MCP Registry | Standard server metadata for registry consumers | Verified namespace and `server.json` referencing the PyPI package; later a remote entry |
 | Lumoz GitHub marketplaces | Direct/team installation | Claude catalog with separate skills/MCP plugins; Codex catalog planned |
 | Claude directory | Discovery inside Claude | Reviewed remote connector or plugin bundle submitted through Claude's portal |
@@ -51,9 +51,9 @@ PyPI description contains the marker. Adding it only to this plugin repository
 does not prove ownership of the Python package. Do not overwrite an existing
 PyPI version. [PyPI ownership requirements](https://modelcontextprotocol.io/registry/package-types).
 
-The following metadata uses **0.4.4 as an illustrative next release**, not an
-existing version verified by this plan. Use the actual release containing the
-ownership marker:
+The following is a metadata template. Replace `REPLACE_WITH_SERVER_VERSION`
+in both fields with the actual published package version containing the
+ownership marker before validating or publishing:
 
 ```json
 {
@@ -61,12 +61,12 @@ ownership marker:
   "name": "io.github.lumozai/lumoz-mcp",
   "title": "Lumoz",
   "description": "Investigate AI agent traces, signals, problems, root causes, and eval suggestions.",
-  "version": "0.4.4",
+  "version": "REPLACE_WITH_SERVER_VERSION",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "lumoz-mcp",
-      "version": "0.4.4",
+      "version": "REPLACE_WITH_SERVER_VERSION",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         {

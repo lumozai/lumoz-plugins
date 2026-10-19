@@ -17,10 +17,10 @@ Fetch the eval suggestion through the Lumoz MCP tools before editing tests:
 - If you know the problem: call `list_problem_eval_suggestions(app_id, problem_id, environment)`.
 - For implementation: call `get_problem_eval_suggestion(app_id, problem_id, eval_suggestion_id, environment)`.
 - If you know the business task name but not its ID/version: call `list_business_tasks(app_id, environment)` and choose the relevant task row.
-- If you know the Business Task: call `list_business_task_eval_suggestions(app_id, task_id, environment, task_version=...)`. This returns existing telemetry-based suggestions or generates them if none exist.
+- If you know the Business Task: call `list_business_task_eval_suggestions(app_id, task_id, environment, task_version=...)`. This returns compact summaries of existing telemetry-based suggestions or generates them if none exist. Select the relevant rows, then fetch each full payload with `get_business_task_eval_suggestion`, passing the `task_version` returned by the list.
 - If you know the eval suggestion ID: call `get_business_task_eval_suggestion(app_id, task_id, eval_suggestion_id, environment, task_version=...)`.
 
-The detail payload is the source of truth. It may come from `get_problem_eval_suggestion`, `get_business_task_eval_suggestion`, or the detailed suggestions returned by `list_business_task_eval_suggestions`. Use:
+The detail payload is the source of truth. It may come from `get_problem_eval_suggestion`, `get_business_task_eval_suggestion`, or the detailed suggestions returned by `list_business_task_eval_suggestions(detail="full", ...)`. The default list response is for discovery and omits the implementation evidence. Use:
 
 - `eval_spec` for the intended assertions and failure mode.
 - `trace_set.primary_failure` for the canonical failing example. For business task telemetry suggestions this field may contain seed/reference traces, not necessarily failures.

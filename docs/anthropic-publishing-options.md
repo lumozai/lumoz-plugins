@@ -50,8 +50,8 @@ publishing a GitHub release alone registers an update feed.
 - Keep manifest `name` stable and increase `version` for each release. A stable
   filename (`lumoz.mcpb`) works; versioned filenames also work. MotherDuck and
   Apify use stable names; Desktop Commander uses versioned names.
-- All three distribution versions start at `0.1.0` and are independent; the
-  shared server pin is `lumoz-mcp==0.4.3`. A PyPI release alone does not update
+- Distribution versions are independent; their values and shared server pin
+  live in `plugin-source/metadata.json`. A PyPI release alone does not update
   installed integrations. Bump the affected distribution versions and server pin.
 - Builds now emit `dist/lumoz.mcpb` and one ZIP per plugin. Component tags trigger
   GitHub release publishing after validation; this does not register an Anthropic

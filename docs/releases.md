@@ -7,12 +7,12 @@ releases distribution packages; it does not publish or copy the Python server.
 
 Edit `plugin-source/metadata.json`, then regenerate the affected files:
 
-| Metadata | Starting value | Change when |
-| --- | --- | --- |
-| `plugins.skills.version` | `0.1.0` | Skills, their manifest, README, or license change |
-| `plugins.mcp.version` | `0.1.0` | CLI MCP configuration, server pin, README, or license change |
-| `desktop.version` | `0.1.0` | MCPB launcher, manifest, server pin, or license change |
-| `mcp.version` | `0.4.3` | Adopting a tested PyPI server release |
+| Metadata | Change when |
+| --- | --- |
+| `plugins.skills.version` | Skills, their manifest, README, or license change |
+| `plugins.mcp.version` | CLI MCP configuration, server pin, README, or license change |
+| `desktop.version` | MCPB launcher, manifest, server pin, or license change |
+| `mcp.version` | Adopting a tested PyPI server release |
 
 Names are installation identities: keep them stable. The MCPB filename stays
 `lumoz.mcpb`; its internal version and containing release tag identify a release.
@@ -48,19 +48,17 @@ tested client versions. Do not check API keys into the repository.
 ## Publish a distribution release
 
 After the release commit is pushed, tag each changed component separately.
-These example tags use the starting versions; substitute the version recorded
-for that component in metadata:
+Use the version recorded for that component in metadata. For example, these
+commands read the skills version and publish only its tag:
 
 ```sh
-git tag lumoz-skills-v0.1.0
-git push origin lumoz-skills-v0.1.0
-
-git tag lumoz-mcp-v0.1.0
-git push origin lumoz-mcp-v0.1.0
-
-git tag lumoz-desktop-v0.1.0
-git push origin lumoz-desktop-v0.1.0
+skills_version=$(python3 -c 'import json; print(json.load(open("plugin-source/metadata.json"))["plugins"]["skills"]["version"])')
+git tag "lumoz-skills-v${skills_version}"
+git push origin "lumoz-skills-v${skills_version}"
 ```
+
+For the CLI MCP plugin use `plugins.mcp.version` and prefix `lumoz-mcp-v`.
+For Desktop use `desktop.version` and prefix `lumoz-desktop-v`.
 
 Push only the tags for components being released. A skills-only change needs
 only a skills tag. A server-pin update normally needs MCP and Desktop tags.
@@ -78,7 +76,8 @@ GitHub Actions' scoped `contents: write` token.
 Local preparation can verify a tag without publishing:
 
 ```sh
-python3 scripts/prepare_release.py lumoz-desktop-v0.1.0
+desktop_version=$(python3 -c 'import json; print(json.load(open("plugin-source/metadata.json"))["desktop"]["version"])')
+python3 scripts/prepare_release.py "lumoz-desktop-v${desktop_version}"
 ```
 
 ## Customer delivery is a separate stage
@@ -98,6 +97,6 @@ python3 scripts/prepare_release.py lumoz-desktop-v0.1.0
 - Official MCP Registry publication, PyPI publication, and hosted MCP deployment
   are separate operations, not performed by this release workflow.
 
-The first `0.1.0` release of each component was published successfully through
+The initial releases of all three components were published successfully through
 the GitHub release workflow. Directory submissions, feed registration,
 signing, and live GUI acceptance tests remain pending.

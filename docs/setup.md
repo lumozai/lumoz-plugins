@@ -24,11 +24,14 @@ Check the runtime:
 ```sh
 uv --version
 uvx --version
-uvx --from lumoz-mcp==0.4.3 python -c "from importlib.metadata import version; print(version('lumoz-mcp'))"
+uvx --from lumoz-mcp python -c "from importlib.metadata import version; print(version('lumoz-mcp'))"
 ```
 
-The last command downloads/caches dependencies and should print `0.4.3`.
-It checks package availability, not authentication or a working MCP connection.
+The last command downloads/caches dependencies and prints the installed
+server version. It checks package availability, not authentication or a
+working MCP connection. Manual examples below use the unpinned PyPI package;
+plugin and extension builds keep their tested pin in
+[release metadata](../plugin-source/metadata.json).
 
 Use the production API default unless Lumoz has given you a different API
 root. `LUMOZ_API_URL` names the REST API, not a hosted MCP endpoint. Do not put
@@ -42,7 +45,7 @@ For Bash, read the key without saving the literal value in shell history:
 read -rsp 'Lumoz API key: ' LUMOZ_API_KEY
 printf '\n'
 export LUMOZ_API_KEY
-claude mcp add --transport stdio --scope user lumoz -- uvx --from lumoz-mcp==0.4.3 lumoz-mcp
+claude mcp add --transport stdio --scope user lumoz -- uvx lumoz-mcp
 claude
 ```
 
@@ -67,7 +70,7 @@ In your private `~/.codex/config.toml`, merge this table with existing settings:
 ```toml
 [mcp_servers.lumoz]
 command = "uvx"
-args = ["--from", "lumoz-mcp==0.4.3", "lumoz-mcp"]
+args = ["lumoz-mcp"]
 env_vars = ["LUMOZ_API_KEY"]
 startup_timeout_sec = 60
 ```
@@ -115,7 +118,7 @@ Open **Settings → Developer → Edit Config**. Merge the following into
   "mcpServers": {
     "lumoz": {
       "command": "uvx",
-      "args": ["--from", "lumoz-mcp==0.4.3", "lumoz-mcp"],
+      "args": ["lumoz-mcp"],
       "env": {
         "LUMOZ_API_KEY": "REPLACE_WITH_CLIENT_ID:CLIENT_SECRET"
       }
@@ -129,7 +132,8 @@ check the tools/connector menu, and run the discovery prompt. This manual
 configuration stores the key in a local file; keep it private.
 
 This is the Desktop **Chat** integration. As an alternative to editing JSON,
-build `dist/lumoz.mcpb` with `python3 scripts/build_mcpb.py`. In a current
+[download `lumoz.mcpb`](https://github.com/lumozai/lumoz-plugins/releases/latest/download/lumoz.mcpb).
+To build from source, use `python3 scripts/build_mcpb.py`. In a current
 Claude Desktop with MCPB 0.4/uv support, open **Settings → Extensions → Advanced
 settings → Install Extension…**, select that file, and enter the full API key
 in the extension form. The sensitive field uses Desktop's OS credential storage.
@@ -159,7 +163,7 @@ claude plugin install lumoz-mcp@lumoz
 claude
 ```
 
-After publication, install inside Claude Code:
+Install inside Claude Code:
 
 ```text
 /plugin marketplace add lumozai/lumoz-plugins
@@ -180,10 +184,16 @@ To uninstall, use `/plugin uninstall lumoz-skills@lumoz` and/or
 
 ### Desktop skills and Cowork
 
-Install **Lumoz Skills** through **Customize → Plugins** using the marketplace
-or directory route when available. It creates no MCP entry and needs no API
-key. For Desktop Chat tools, install `lumoz.mcpb` as described in section 4;
-enter the key there. Do not install the CLI MCP plugin for Desktop Chat.
+1. Open **Customize → Plugins → Add → Add marketplace**.
+2. Choose **Add from a repository** and enter `lumozai/lumoz-plugins`.
+3. Install **Lumoz Skills** (`lumoz-skills`) from the added marketplace.
+
+This installs the `lumoz-evals` skill, creates no MCP entry, and needs no API
+key. Adding this Git marketplace does not require an Anthropic directory
+listing. Plugins require a paid Claude plan. For Desktop Chat tools, install
+`lumoz.mcpb` as described in section 4 and enter the key there; custom MCPB
+installation also does not require a directory listing. Do not install the
+CLI MCP plugin for Desktop Chat.
 
 Cowork tool access still needs verification independently of skills. Local
 stdio servers cannot run in cloud Cowork sessions. Organization policies can
@@ -267,10 +277,12 @@ generate data; `list_apps` is the preferred initial read-only smoke test.
 | Browser cannot connect to stdio | Use a deployed remote connector; local config does not sync a running process |
 | Directory search has no Lumoz | Public approval/publication is separate; use manual setup until the listing is live |
 
-For a direct install, update the exact `0.4.3` pin only to a tested version,
-prewarm it, restart, and rerun discovery. Plugin updates should carry a new
-plugin version and document the server pin. Keep the last tested pin for
-rollback. To uninstall direct integrations, use `claude mcp remove lumoz
+For a direct install, uv caches the tool environment. To adopt an update,
+run `uvx --upgrade lumoz-mcp` with your API key set, stop that standalone
+server, restart the client, and rerun discovery. To control adoption, pin a
+chosen version with `uvx --from 'lumoz-mcp==<version>' lumoz-mcp` and change
+that pin explicitly when upgrading. Plugin updates carry their tested server
+pin and a new distribution version in release metadata. To uninstall direct integrations, use `claude mcp remove lumoz
 --scope user` or `codex mcp remove lumoz`; remove Desktop JSON entries through
 the configuration editor. Remove installed plugins through each client's
 plugin manager, and revoke unused Lumoz keys separately.

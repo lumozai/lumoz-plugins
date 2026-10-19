@@ -9,9 +9,10 @@ install skills without enabling an unconfigured MCP server.
 | `lumoz-mcp` | Pinned stdio server configuration; no skills | Claude Code |
 | `lumoz.mcpb` | Desktop MCP extension with API-key form; no skills | Claude Desktop Chat |
 
-**Preview:** all distribution versions start at `0.1.0`. Both MCP packages use
-`lumoz-mcp==0.4.3` from PyPI. No server source checkout is needed. Public
-listings and Windows/macOS GUI verification are pending. Codex uses the
+**Preview:** MCP packages use a tested server release from PyPI. See
+[release metadata](plugin-source/metadata.json) for distribution versions and
+the server pin. No server source checkout is needed. Public listings and
+Windows/macOS GUI verification are pending. Codex uses the
 [direct MCP setup](docs/setup.md#3-codex-cli-and-codex-app-today) today; Codex
 plugin packaging is not implemented.
 
@@ -40,8 +41,9 @@ third-party marketplace auto-update is off by default.
 
 ## Claude Desktop
 
-1. Install **Lumoz Skills** through **Customize → Plugins** from the Lumoz
-   marketplace/directory when available. Do not install the CLI MCP plugin here.
+1. Open **Customize → Plugins → Add → Add marketplace**. Choose
+   **Add from a repository**, enter `lumozai/lumoz-plugins`, then install
+   **Lumoz Skills** (`lumoz-skills`). Do not install the CLI MCP plugin here.
 2. For MCP tools, [download `lumoz.mcpb`](https://github.com/lumozai/lumoz-plugins/releases/latest/download/lumoz.mcpb), then open
    **Settings → Extensions → Advanced settings → Install Extension…** and
    select the downloaded file.
@@ -59,6 +61,10 @@ previous manual Lumoz entry from `claude_desktop_config.json` to avoid duplicate
 tools; preserve other servers. The extension and skills plugin configure
 independently. Cowork tool access requires separate verification; local stdio
 servers cannot run in cloud sessions.
+
+These installation routes do not require an Anthropic directory listing.
+Plugins require a paid Claude plan, and organization policies can restrict
+marketplaces and extensions. See [Claude's plugin instructions](https://support.claude.com/en/articles/13837440-use-plugins-in-claude).
 
 Directory-installed extensions support automatic updates. Manually installed
 files need updating manually. Anthropic release-feed registration is pending;
@@ -105,8 +111,8 @@ claude plugin validate plugins/lumoz-mcp --strict
 npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb/manifest.json
 ```
 
-Outputs: `dist/lumoz-skills-0.1.0.zip`, `dist/lumoz-mcp-0.1.0.zip`, and
-`dist/lumoz.mcpb`. Plugin ZIPs contain their manifest, short README, license,
+Outputs: a versioned ZIP for each plugin and `dist/lumoz.mcpb`.
+ZIP filenames use the corresponding version from `plugin-source/metadata.json`. Plugin ZIPs contain their manifest, short README, license,
 and only their own skill or MCP component. The MCPB contains its manifest,
 `pyproject.toml`, launcher, and license. Optional `NOTICE` is also included.
 The root license is copied into each plugin by the generator; check these

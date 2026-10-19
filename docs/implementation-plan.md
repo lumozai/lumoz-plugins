@@ -17,7 +17,7 @@ source checkout.
 | Builds | `scripts/build_claude.py`, `scripts/build_mcpb.py` | Generate metadata and package only intended inputs |
 | Release workflow | `.github/workflows/release.yml` | Validates component tag, checks PyPI for MCP releases, publishes selected GitHub asset |
 
-All distribution versions begin at `0.1.0`; the server pin remains `0.4.3`.
+Distribution versions and the shared server pin live in `plugin-source/metadata.json`.
 The server console entry point is `lumoz_mcp.server:main`, requires Python
 3.11+, and speaks stdio. The Desktop launcher calls that same entry point.
 The runtime reads `LUMOZ_API_KEY` in `client_id:client_secret` form. A `.env`
@@ -44,7 +44,7 @@ skill. The root repository is no longer an installable plugin.
   plugin versions do not change Desktop metadata.
 - Strict Claude marketplace/plugin validation and official MCPB validation.
 - Release tag-to-component/version validation, selected-asset publication.
-- Successful GitHub workflow publication of all three `0.1.0` distributions.
+- Successful GitHub workflow publication of all three distributions.
 - Pre-commit Gitleaks hook, CI history scanning, and repository-wide GitHub
   secret scanning and push protection. See [contributing](contributing.md).
 - Earlier Linux MCPB startup test initialized and discovered 27 tools using

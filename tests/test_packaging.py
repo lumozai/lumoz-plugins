@@ -35,7 +35,10 @@ class PackagingTests(unittest.TestCase):
         (self.root / "LICENSE").write_text("Test license fixture\n")
         result = self.build("--zip")
         self.assertEqual(result.returncode, 0, result.stderr)
-        with ZipFile(self.root / "dist/lumoz-skills-0.1.0.zip") as archive:
+        metadata = json.loads((self.root / "plugin-source/metadata.json").read_text())
+        skills_version = metadata["plugins"]["skills"]["version"]
+        mcp_version = metadata["plugins"]["mcp"]["version"]
+        with ZipFile(self.root / f"dist/lumoz-skills-{skills_version}.zip") as archive:
             self.assertIsNone(archive.testzip())
             self.assertEqual(set(archive.namelist()), {
                 ".claude-plugin/plugin.json",
@@ -48,7 +51,7 @@ class PackagingTests(unittest.TestCase):
             self.assertNotIn("userConfig", manifest)
             self.assertNotIn("dependencies", manifest)
             self.assertEqual(archive.read("LICENSE"), b"Test license fixture\n")
-        with ZipFile(self.root / "dist/lumoz-mcp-0.1.0.zip") as archive:
+        with ZipFile(self.root / f"dist/lumoz-mcp-{mcp_version}.zip") as archive:
             self.assertEqual(set(archive.namelist()), {
                 ".claude-plugin/plugin.json", ".mcp.json", "README.md", "LICENSE",
             })

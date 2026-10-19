@@ -8,7 +8,7 @@
   "repository": "https://github.com/lumozai/lumoz-plugins",
   "license": "Apache-2.0",
   "name": "lumoz-skills",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Lumoz Skills",
   "description": "Create regression evals from Lumoz eval suggestions using your project's test framework.",
   "keywords": [

@@ -1,7 +1,7 @@
 {
   "name": "lumoz",
   "plugins": {
-    "skills": {"name": "lumoz-skills", "version": "0.1.0"},
+    "skills": {"name": "lumoz-skills", "version": "0.1.1"},
     "mcp": {"name": "lumoz-mcp", "version": "0.1.0"}
   },
   "desktop": {"name": "lumoz", "version": "0.1.0"},
