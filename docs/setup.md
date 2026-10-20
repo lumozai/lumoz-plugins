@@ -30,7 +30,7 @@ uvx --from lumoz-mcp python -c "from importlib.metadata import version; print(ve
 The last command downloads/caches dependencies and prints the installed
 server version. It checks package availability, not authentication or a
 working MCP connection. Manual examples below use the unpinned PyPI package;
-plugin and extension builds keep their tested pin in
+Codex setup, plugin builds, and extension builds use the tested pin in
 [release metadata](../plugin-source/metadata.json).
 
 Use the production API default unless Lumoz has given you a different API
@@ -93,7 +93,65 @@ needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
 GUI installation has not yet been tested. Installing a local plugin does not
 publish it to the universal directory or configure Lumoz tools in cloud Chat.
 
-### Existing MCP setup
+### Install MCP tools with a saved key
+
+Install Codex CLI, uv, and Python 3.11+ first. For a new checkout, run:
+
+```sh
+git clone https://github.com/lumozai/lumoz-plugins.git
+cd lumoz-plugins
+```
+
+From the repository root, run:
+
+```sh
+python3 scripts/setup_codex.py
+```
+
+This script belongs to the public plugins repository. It is not a server
+subcommand and does not install the separate skills plugin.
+
+The installer checks for Codex CLI and `uvx`, then asks for your full
+`client_id:client_secret` API key with hidden input. It uses `codex mcp add`
+to register the tested server version from `plugin-source/metadata.json`,
+with the absolute `uvx` path and the saved key. No shell export is required.
+Run this directly in your terminal; piping input is not supported.
+
+Codex saves the key as plaintext under `[mcp_servers.lumoz.env]` in its private
+`~/.codex/config.toml` (or the profile selected by `CODEX_HOME`). Keep that file
+outside source control. Running setup again replaces the entire `lumoz` MCP
+entry, including its previous key and custom server settings; other server
+entries and the skills plugin remain configured.
+
+Restart Codex, open `/mcp`, and ask:
+
+> Use Lumoz to list all apps and environments I can access. Do not modify anything.
+
+The first connection downloads the server and dependencies through `uvx` if
+needed. Registration alone does not verify the key or API connectivity; a
+successful tool call does. If a first connection times out during downloads,
+retry the connection or set `startup_timeout_sec = 60` in `[mcp_servers.lumoz]`.
+The absolute `uvx` path and saved key also avoid relying on a desktop app's
+inherited terminal PATH or API-key environment variable.
+
+To rotate the saved key or update the server to this checkout's pin, rerun
+setup. Updating the skills plugin alone does not update this registration.
+
+### Uninstall MCP tools
+
+```sh
+python3 scripts/setup_codex.py uninstall
+# Equivalent command; works without this repository or uv:
+codex mcp remove lumoz
+```
+
+This deletes `[mcp_servers.lumoz]` and its `[mcp_servers.lumoz.env]` key from
+the private Codex configuration. Restart active Codex sessions to disconnect
+their running server. It leaves the skills plugin and uv's package cache in
+place, and does not revoke the key in your Lumoz account. Copies you saved
+elsewhere, including shell variables or configuration backups, are separate.
+
+### Manual alternative: forward a key from your environment
 
 In your private `~/.codex/config.toml`, merge this table with existing settings:
 
@@ -264,7 +322,8 @@ Install `lumoz-skills` using the commands in section 3. The Codex marketplace
 lists the same skills folder as Claude's catalog, with one canonical skill and
 one shared skills version. Its root `plugin.json` provides the portable format;
 Codex also accepts the existing `.claude-plugin/plugin.json`. Configure MCP
-separately in private `~/.codex/config.toml`. The Claude MCP plugin and Claude
+separately with `python3 scripts/setup_codex.py`, as described in section 3.
+The Claude MCP plugin and Claude
 Desktop MCPB remain separate distributions.
 
 ## 6. Hosted connection after deployment

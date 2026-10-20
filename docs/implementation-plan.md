@@ -13,6 +13,7 @@ source checkout.
 | Codex marketplace | `.agents/plugins/marketplace.json` | Lists the shared skills plugin only |
 | Skills plugin | `plugins/lumoz-skills/` | Canonical `lumoz-evals` skill, no MCP or credentials |
 | CLI MCP plugin | `plugins/lumoz-mcp/` | Pinned server through `uvx`; Claude Code key setting |
+| Codex MCP setup | `scripts/setup_codex.py` | Hidden key prompt, pinned server registration, and uninstall through Codex CLI |
 | Desktop extension | `mcpb/` | MCPB 0.4 managed uv runtime, Python import launcher, sensitive API-key form |
 | Versions | `plugin-source/metadata.json` | Three independent distribution versions and a shared server pin |
 | Builds | `scripts/build_claude.py`, `scripts/build_mcpb.py` | Generate metadata and package only intended inputs |
@@ -31,7 +32,8 @@ entry because the required plugin credential prompt was unavailable. The
 skills plugin now contains no MCP configuration, credential settings, or
 plugin dependencies. Desktop users install it alongside the MCPB. Claude Code
 users install the skills and MCP plugins independently. Codex users install
-the skills plugin and keep MCP credentials in private user configuration.
+the skills plugin and run the separate setup script, which saves MCP
+credentials in private user configuration without requiring a shell export.
 
 Keep the existing `lumoz-evals` skill name for standalone portability. Its
 Claude Code command becomes `/lumoz-skills:lumoz-evals`. MCP tools appear under
@@ -50,6 +52,10 @@ skill. The root repository is no longer an installable plugin.
   the app-server protocol, with private MCP configuration preserved on plugin
   reinstall and removal. The published Claude-format skills plugin was also
   installed and discovered successfully by Codex CLI.
+- Codex setup tests with dummy credentials: registration, saved-key replacement,
+  and removal through the real CLI preserve unrelated server configuration.
+  Failure checks cover invalid keys, missing uvx, hidden-input availability,
+  error redaction, and command timeouts. Live API access remains unverified.
 - Release tag-to-component/version validation, selected-asset publication.
 - Successful GitHub workflow publication of all three distributions.
 - Pre-commit Gitleaks hook, CI history scanning, and repository-wide GitHub

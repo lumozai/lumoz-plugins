@@ -22,15 +22,17 @@ marketplace name, `lumoz`, not a fourth release version.
 Claude and Codex use the same skills folder and version. The generator updates
 the skills plugin's portable and Claude manifests and both marketplace catalogs
 together. No separate Codex skills version or release tag is needed. The MCP
-plugin is for Claude Code; Codex MCP uses private user configuration. Desktop
-MCPB keeps its own version.
+plugin is for Claude Code; Codex MCP uses the separate `scripts/setup_codex.py`
+installer and private user configuration. The script reads `mcp.version` and
+ships through this repository without a component release tag. Desktop MCPB
+keeps its own version.
 
 ## After a server update
 
 1. Release and verify the new `lumoz-mcp` version on PyPI from the server repo.
 2. Update `mcp.version` here. Increase `plugins.mcp.version` and
    `desktop.version` for the integrations that will adopt it. One shared pin
-   keeps future builds of both routes aligned; installed packages retain the
+   keeps future builds and Codex setup aligned; installed packages retain the
    version they already received until their distribution is released/updated.
 3. Leave `plugins.skills.version` unchanged unless the skill or its package
    changed. Tool/schema changes may require updating the skill too.
@@ -95,7 +97,12 @@ python3 scripts/prepare_release.py "lumoz-desktop-v${desktop_version}"
   Claude Code users must enable auto-update for our third-party marketplace.
   Codex users refresh with `codex plugin marketplace upgrade lumoz`, reinstall
   `lumoz-skills` using `codex plugin add lumoz-skills@lumoz`, and start a new
-  session. Their manual MCP configuration is independent of skills updates.
+  session. Their MCP configuration and saved key are independent of skills updates.
+- Codex MCP users update their checkout with `git pull --ff-only` and rerun
+  `python3 scripts/setup_codex.py` to adopt that checkout's tested server pin.
+  Setup prompts for the key again and replaces the complete `lumoz` MCP entry.
+  A new PyPI release or skills-plugin update alone does not change the saved pin.
+  `codex mcp remove lumoz` removes the registration and its stored key.
 - Anthropic plugin directory submissions track the relevant plugin folder and
   branch/tag, with checks and publishing controls. Submit
   `plugins/lumoz-skills` and `plugins/lumoz-mcp` separately if listing both.

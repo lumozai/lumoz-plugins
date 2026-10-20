@@ -7,13 +7,14 @@ install skills without enabling an unconfigured MCP server.
 | --- | --- | --- |
 | `lumoz-skills` | `lumoz-evals` skill; no MCP or credentials | Claude Desktop, Cowork, Claude Code, Codex CLI/app |
 | `lumoz-mcp` | Pinned stdio server configuration; no skills | Claude Code |
+| Codex setup script | Hidden API-key prompt and pinned stdio server registration | Codex CLI/app |
 | `lumoz.mcpb` | Desktop MCP extension with API-key form; no skills | Claude Desktop Chat |
 
 **Preview:** MCP packages use a tested server release from PyPI. See
 [release metadata](plugin-source/metadata.json) for distribution versions and
 the server pin. No server source checkout is needed. Public listings and
-Windows/macOS GUI verification are pending. Codex skills installation is tested
-with the CLI; MCP uses private per-user configuration.
+Windows/macOS GUI verification are pending. Codex skills installation and MCP
+setup are tested with the CLI; MCP uses private per-user configuration.
 
 ## Codex CLI and app
 
@@ -35,9 +36,34 @@ needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
 GUI installation has not yet been tested. Installing a local plugin does not
 publish it to the universal directory or configure Lumoz tools in cloud Chat.
 
-For MCP tools, keep the existing private `~/.codex/config.toml` snippet and API
-key. See the [Codex setup guide](docs/setup.md#3-codex-cli-and-codex-app-today).
-Skills installation and updates do not change that configuration.
+For MCP tools, run this from a checkout of this repository (requires Python
+3.11+, Codex CLI, and uv):
+
+```sh
+python3 scripts/setup_codex.py
+```
+
+If you do not have a checkout, clone it first with
+`git clone https://github.com/lumozai/lumoz-plugins.git`, then
+`cd lumoz-plugins`. The setup script lives in this public repository; it is
+not a subcommand of the `lumoz-mcp` server or part of the skills plugin.
+
+Enter the full Lumoz API key (`client_id:client_secret`) at the hidden prompt.
+Setup registers the pinned server and saves the key in your private Codex
+`config.toml` as plaintext; no environment export is needed. Restart Codex and
+check `/mcp`. Running setup again replaces the Lumoz registration and key.
+
+To uninstall the MCP connection and delete its saved key:
+
+```sh
+python3 scripts/setup_codex.py uninstall
+# Or, without this checkout:
+codex mcp remove lumoz
+```
+
+See the [Codex setup guide](docs/setup.md#3-codex-cli-and-codex-app-today)
+for verification and manual configuration. Skills installation and updates
+do not change the MCP connection.
 
 ## Claude Code
 
