@@ -44,13 +44,17 @@ jobs:
         run: |
           python3 scripts/build_claude.py --check
           python3 scripts/build_mcpb.py --check
-      - name: Check packaging boundaries
-        run: python3 -m unittest discover -s tests -v
+      - name: Validate portable plugin schemas
+        run: |
+          python3 -m pip install jsonschema==4.25.1
+          python3 scripts/validate_portable.py
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install tested Claude Code validator
-        run: npm install --global @anthropic-ai/claude-code@2.1.302
+      - name: Install tested plugin clients
+        run: npm install --global @anthropic-ai/claude-code@2.1.302 @openai/codex@0.163.0
+      - name: Check packaging and Codex installation
+        run: python3 -m unittest discover -s tests -v
       - name: Validate Claude marketplace and plugins
         run: |
           claude plugin validate . --strict
@@ -69,7 +73,7 @@ jobs:
           python3 -m zipfile --test dist/lumoz.mcpb
       - uses: actions/upload-artifact@v4
         with:
-          name: lumoz-claude-plugins
+          name: lumoz-plugins
           path: dist/*.zip
           if-no-files-found: error
       - uses: actions/upload-artifact@v4

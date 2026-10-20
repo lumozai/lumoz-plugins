@@ -19,6 +19,12 @@ Names are installation identities: keep them stable. The MCPB filename stays
 The plugin ZIP filenames include their respective versions. Root `name` is the
 marketplace name, `lumoz`, not a fourth release version.
 
+Claude and Codex use the same skills folder and version. The generator updates
+the skills plugin's portable and Claude manifests and both marketplace catalogs
+together. No separate Codex skills version or release tag is needed. The MCP
+plugin is for Claude Code; Codex MCP uses private user configuration. Desktop
+MCPB keeps its own version.
+
 ## After a server update
 
 1. Release and verify the new `lumoz-mcp` version on PyPI from the server repo.
@@ -35,6 +41,8 @@ python3 scripts/build_claude.py --zip
 python3 scripts/build_mcpb.py
 python3 scripts/build_claude.py --check
 python3 scripts/build_mcpb.py --check
+python3 -m pip install jsonschema==4.25.1
+python3 scripts/validate_portable.py
 python3 -m unittest discover -s tests -v
 claude plugin validate . --strict
 claude plugin validate plugins/lumoz-skills --strict
@@ -42,7 +50,7 @@ claude plugin validate plugins/lumoz-mcp --strict
 npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb/manifest.json
 ```
 
-Test the new server through both clients with an authenticated read and record
+Test the new server through Claude Code, Codex, and Claude Desktop with an authenticated read and record
 tested client versions. Do not check API keys into the repository.
 
 ## Publish a distribution release
@@ -85,6 +93,9 @@ python3 scripts/prepare_release.py "lumoz-desktop-v${desktop_version}"
 - GitHub-backed plugin marketplaces read the committed plugin directories;
   they do not consume the release ZIP. Bump the plugin version with changes.
   Claude Code users must enable auto-update for our third-party marketplace.
+  Codex users refresh with `codex plugin marketplace upgrade lumoz`, reinstall
+  `lumoz-skills` using `codex plugin add lumoz-skills@lumoz`, and start a new
+  session. Their manual MCP configuration is independent of skills updates.
 - Anthropic plugin directory submissions track the relevant plugin folder and
   branch/tag, with checks and publishing controls. Submit
   `plugins/lumoz-skills` and `plugins/lumoz-mcp` separately if listing both.

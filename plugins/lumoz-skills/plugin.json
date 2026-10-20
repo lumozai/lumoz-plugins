@@ -1,0 +1,30 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "author": {
+    "name": "Lumoz AI",
+    "email": "support@lumoz.ai",
+    "url": "https://lumoz.ai"
+  },
+  "homepage": "https://github.com/lumozai/lumoz-plugins#readme",
+  "repository": "https://github.com/lumozai/lumoz-plugins",
+  "license": "Apache-2.0",
+  "name": "lumoz-skills",
+  "version": "0.2.0",
+  "description": "Create regression evals from Lumoz eval suggestions using your project's test framework.",
+  "keywords": [
+    "lumoz",
+    "skills",
+    "evals",
+    "observability"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Lumoz Skills",
+        "shortDescription": "Create regression evals from Lumoz eval suggestions using your project's test framework.",
+        "developerName": "Lumoz AI",
+        "category": "Developer Tools"
+      }
+    }
+  }
+}

@@ -1,8 +1,8 @@
 # Setup guide
 
-Sections 1–4 configure MCP tools. Section 5 installs the separate Claude skills
-and CLI MCP plugins. Codex plugin packaging and the
-hosted endpoint in section 6 are still planned.
+Sections 1–4 configure MCP tools and the Codex skills plugin in section 3.
+Section 5 installs the separate Claude skills and CLI MCP plugins. The hosted
+endpoint in section 6 is still planned.
 
 ## 1. Prerequisites
 
@@ -65,6 +65,36 @@ never commit a real key. See
 
 ## 3. Codex CLI and Codex app today
 
+### Install the skills plugin
+
+Use a current Codex client with plugin support:
+
+```sh
+codex plugin marketplace add lumozai/lumoz-plugins
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session. Open `/plugins` to inspect the package and ask Codex to use
+`lumoz-evals`. The same plugin folder and skill files serve Claude and Codex.
+The skills plugin needs no API key, Python runtime, or MCP plugin installation.
+It does not change your MCP configuration.
+
+Codex CLI 0.163.0 successfully installed the published Claude-format skills
+plugin and discovered `lumoz-skills:lumoz-evals`; this is a tested client
+version, not a claimed minimum. The portable manifest also supports the
+recommended Agent Plugins format. Git marketplace installation requires no
+OpenAI directory approval. For a local checkout, replace the repository name
+with `.` from its root. See [OpenAI's packaging guide](https://developers.openai.com/plugins/build/plugins).
+
+In the ChatGPT desktop app, restart the app, open the Plugins Directory in
+Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
+needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
+[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
+GUI installation has not yet been tested. Installing a local plugin does not
+publish it to the universal directory or configure Lumoz tools in cloud Chat.
+
+### Existing MCP setup
+
 In your private `~/.codex/config.toml`, merge this table with existing settings:
 
 ```toml
@@ -107,6 +137,25 @@ If needed, replace `command = "uvx"` with the absolute executable path returned
 by `command -v uvx` on macOS/Linux or `where.exe uvx` on Windows.
 This config applies to local execution; it does not register a browser-chat
 connector. [OpenAI MCP configuration](https://developers.openai.com/codex/mcp).
+
+
+### Update or remove
+
+To refresh the marketplace and install the current skills version:
+
+```sh
+codex plugin marketplace upgrade lumoz
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session afterward. To remove the skills plugin:
+
+```sh
+codex plugin remove lumoz-skills@lumoz
+```
+
+These operations preserve your manual MCP configuration and key. To remove MCP
+separately, run `codex mcp remove lumoz`.
 
 ## 4. Claude Desktop Chat today
 
@@ -211,10 +260,12 @@ in the same client when replacing them.
 
 ### Codex
 
-Codex-specific plugin metadata and a catalog are not implemented. Use the
-local MCP configuration in section 3; do not install Claude's manifests as
-Codex plugins. The skill remains ordinary `SKILL.md` content at
-`plugins/lumoz-skills/skills/lumoz-evals/`, ready for future Codex packaging.
+Install `lumoz-skills` using the commands in section 3. The Codex marketplace
+lists the same skills folder as Claude's catalog, with one canonical skill and
+one shared skills version. Its root `plugin.json` provides the portable format;
+Codex also accepts the existing `.claude-plugin/plugin.json`. Configure MCP
+separately in private `~/.codex/config.toml`. The Claude MCP plugin and Claude
+Desktop MCPB remain separate distributions.
 
 ## 6. Hosted connection after deployment
 

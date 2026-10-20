@@ -41,6 +41,7 @@ class PackagingTests(unittest.TestCase):
         with ZipFile(self.root / f"dist/lumoz-skills-{skills_version}.zip") as archive:
             self.assertIsNone(archive.testzip())
             self.assertEqual(set(archive.namelist()), {
+                "plugin.json",
                 ".claude-plugin/plugin.json",
                 "README.md",
                 "skills/lumoz-evals/SKILL.md",
@@ -50,6 +51,9 @@ class PackagingTests(unittest.TestCase):
             self.assertNotIn("mcpServers", manifest)
             self.assertNotIn("userConfig", manifest)
             self.assertNotIn("dependencies", manifest)
+            portable = json.loads(archive.read("plugin.json"))
+            self.assertEqual(portable["version"], manifest["version"])
+            self.assertEqual(portable["name"], manifest["name"])
             self.assertEqual(archive.read("LICENSE"), b"Test license fixture\n")
         with ZipFile(self.root / f"dist/lumoz-mcp-{mcp_version}.zip") as archive:
             self.assertEqual(set(archive.namelist()), {
@@ -104,6 +108,22 @@ class PackagingTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Unexpected combined-plugin component", result.stderr)
         self.assertFalse((self.root / "dist").exists())
+
+    def test_skills_cannot_accidentally_gain_a_portable_mcp_entry(self):
+        (self.skills / "mcp.json").write_text('{}\n')
+        result = self.build("--zip")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Unexpected combined-plugin component", result.stderr)
+        self.assertFalse((self.root / "dist").exists())
+
+    def test_check_detects_stale_portable_metadata_without_writing(self):
+        self.assertEqual(self.build().returncode, 0)
+        path = self.skills / "plugin.json"
+        path.write_text('{}\n')
+        result = self.build("--check")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("plugin.json", result.stderr)
+        self.assertEqual(path.read_text(), '{}\n')
 
     def test_check_detects_stale_license_without_writing(self):
         self.assertEqual(self.build().returncode, 0)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate independent Claude plugins and optionally build their trial ZIPs."""
+"""Generate portable and Claude plugin metadata and optionally build their ZIPs."""
 
 import argparse
 import json
@@ -9,6 +9,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PLUGIN_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
 
 
 def manifests(metadata):
@@ -43,7 +44,30 @@ def manifests(metadata):
             },
         },
     }
+    portable_skills = {
+        "$schema": PLUGIN_SCHEMA,
+        **common, **metadata["plugins"]["skills"],
+        "description": skills["description"],
+        "keywords": skills["keywords"],
+        "extensions": {"com.openai": {"interface": {
+            "displayName": skills["displayName"],
+            "shortDescription": skills["description"],
+            "developerName": author["name"],
+            "category": "Developer Tools",
+        }}},
+    }
     return {
+        f"plugins/{skills['name']}/plugin.json": portable_skills,
+        ".agents/plugins/marketplace.json": {
+            "name": metadata["name"],
+            "interface": {"displayName": "Lumoz"},
+            "plugins": [{
+                "name": skills["name"],
+                "source": {"source": "local", "path": f"./plugins/{skills['name']}"},
+                "policy": {"installation": "AVAILABLE", "authentication": "ON_USE"},
+                "category": "Developer Tools",
+            }],
+        },
         ".claude-plugin/marketplace.json": {
             "name": metadata["name"], "owner": author,
             "description": "Lumoz skills for Claude and a separate MCP integration for Claude Code.",
@@ -85,6 +109,7 @@ def package_files(name, skills=False):
     if (root / "NOTICE").is_file():
         files.append(root / "NOTICE")
     if skills:
+        files.append(root / "plugin.json")
         files += sorted(path for path in (root / "skills").rglob("*") if path.is_file())
     else:
         files.append(root / ".mcp.json")
@@ -106,9 +131,14 @@ def main():
     plugins = metadata["plugins"]
     # Retired root files or crossed components would defeat independent installs.
     forbidden = (
-        ".claude-plugin/plugin.json", ".mcp.json", "skills",
+        ".claude-plugin/plugin.json", "plugin.json", ".mcp.json", "mcp.json", "skills",
         f"plugins/{plugins['skills']['name']}/.mcp.json",
+        f"plugins/{plugins['skills']['name']}/mcp.json",
+        f"plugins/{plugins['skills']['name']}/.codex-plugin",
         f"plugins/{plugins['mcp']['name']}/skills",
+        f"plugins/{plugins['mcp']['name']}/plugin.json",
+        f"plugins/{plugins['mcp']['name']}/mcp.json",
+        f"plugins/{plugins['mcp']['name']}/.codex-plugin/plugin.json",
     )
     for name in forbidden:
         if (ROOT / name).exists():
@@ -158,7 +188,7 @@ def main():
                         archive.write(path, path.relative_to(ROOT / "plugins" / plugin["name"]).as_posix())
                 print(f"Built {output.relative_to(ROOT)} ({len(files)} files)")
         else:
-            print(f"Two Claude plugins {'checked' if args.check else 'generated'}.")
+            print(f"Skills and Claude MCP plugins {'checked' if args.check else 'generated'}.")
     except (ValueError, OSError) as error:
         print(error, file=sys.stderr)
         return 1

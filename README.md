@@ -5,16 +5,39 @@ install skills without enabling an unconfigured MCP server.
 
 | Package | Contents | Client |
 | --- | --- | --- |
-| `lumoz-skills` | `lumoz-evals` skill; no MCP or credentials | Claude Desktop, Cowork, Claude Code |
+| `lumoz-skills` | `lumoz-evals` skill; no MCP or credentials | Claude Desktop, Cowork, Claude Code, Codex CLI/app |
 | `lumoz-mcp` | Pinned stdio server configuration; no skills | Claude Code |
 | `lumoz.mcpb` | Desktop MCP extension with API-key form; no skills | Claude Desktop Chat |
 
 **Preview:** MCP packages use a tested server release from PyPI. See
 [release metadata](plugin-source/metadata.json) for distribution versions and
 the server pin. No server source checkout is needed. Public listings and
-Windows/macOS GUI verification are pending. Codex uses the
-[direct MCP setup](docs/setup.md#3-codex-cli-and-codex-app-today) today; Codex
-plugin packaging is not implemented.
+Windows/macOS GUI verification are pending. Codex skills installation is tested
+with the CLI; MCP uses private per-user configuration.
+
+## Codex CLI and app
+
+Install the skills plugin from your terminal:
+
+```sh
+codex plugin marketplace add lumozai/lumoz-plugins
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session and ask Codex to use `lumoz-evals`. This is the same skills
+plugin and skill content used by Claude; no API key or Python runtime is needed
+to install the skill. No OpenAI directory approval is required for this route.
+
+In the ChatGPT desktop app, restart the app, open the Plugins Directory in
+Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
+needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
+[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
+GUI installation has not yet been tested. Installing a local plugin does not
+publish it to the universal directory or configure Lumoz tools in cloud Chat.
+
+For MCP tools, keep the existing private `~/.codex/config.toml` snippet and API
+key. See the [Codex setup guide](docs/setup.md#3-codex-cli-and-codex-app-today).
+Skills installation and updates do not change that configuration.
 
 ## Claude Code
 
@@ -91,8 +114,9 @@ The repository root is a marketplace, not an installable plugin:
 
 ```text
 .claude-plugin/marketplace.json
+.agents/plugins/marketplace.json
 plugins/lumoz-skills/    # Self-contained skills plugin
-plugins/lumoz-mcp/       # Self-contained CLI MCP plugin
+plugins/lumoz-mcp/       # Self-contained Claude Code MCP plugin
 mcpb/                   # Desktop manifest, dependency declaration, launcher
 plugin-source/metadata.json
 scripts/
@@ -104,6 +128,8 @@ python3 scripts/build_claude.py --zip
 python3 scripts/build_mcpb.py
 python3 scripts/build_claude.py --check
 python3 scripts/build_mcpb.py --check
+python3 -m pip install jsonschema==4.25.1
+python3 scripts/validate_portable.py
 python3 -m unittest discover -s tests -v
 claude plugin validate . --strict
 claude plugin validate plugins/lumoz-skills --strict
@@ -112,12 +138,22 @@ npx --yes @anthropic-ai/mcpb@2.1.2 validate mcpb/manifest.json
 ```
 
 Outputs: a versioned ZIP for each plugin and `dist/lumoz.mcpb`.
-ZIP filenames use the corresponding version from `plugin-source/metadata.json`. Plugin ZIPs contain their manifest, short README, license,
-and only their own skill or MCP component. The MCPB contains its manifest,
+ZIP filenames use the corresponding version from `plugin-source/metadata.json`.
+The skills ZIP includes portable and Claude manifests, a short README,
+the license, and skill files. The Claude MCP ZIP includes its Claude manifest,
+server configuration, README, and license. The MCPB contains its manifest,
 `pyproject.toml`, launcher, and license. Optional `NOTICE` is also included.
 The root license is copied into each plugin by the generator; check these
 copies in with generated manifests. Documentation and build tooling stay out
 of all three packages.
+
+`scripts/build_claude.py` generates both portable and Claude metadata. Portable
+skills use root `plugin.json`; Claude uses `.claude-plugin/plugin.json` in the
+same skills folder. The MCP plugin retains its Claude-only configuration.
+Install Codex CLI to run the integration test; CI uses the tested version
+recorded in its workflow. The test installs into a temporary profile and checks
+actual skill discovery and preservation of private MCP configuration using
+dummy credentials.
 
 Each distribution has its own version in
 [plugin-source/metadata.json](plugin-source/metadata.json), separate from the

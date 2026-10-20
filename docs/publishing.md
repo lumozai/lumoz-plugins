@@ -11,7 +11,7 @@ publication status before advertising its listing.
 | --- | --- | --- |
 | PyPI | Downloadable Python server | Published, versioned `lumoz-mcp` package |
 | Official MCP Registry | Standard server metadata for registry consumers | Verified namespace and `server.json` referencing the PyPI package; later a remote entry |
-| Lumoz GitHub marketplaces | Direct/team installation | Claude catalog with separate skills/MCP plugins; Codex catalog planned |
+| Lumoz GitHub marketplaces | Direct/team installation | Shared skills plugin for Claude and Codex; separate MCP plugin for Claude Code |
 | Claude directory | Discovery inside Claude | Reviewed remote connector or plugin bundle submitted through Claude's portal |
 | Claude Desktop extensions directory | Local MCP discovery in Desktop | Reviewed `.mcpb` submitted through the desktop-extension route |
 | OpenAI universal plugin directory | Discovery in ChatGPT and Codex | Reviewed plugin package and connected MCP integration |

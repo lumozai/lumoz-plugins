@@ -1,0 +1,20 @@
+{
+  "name": "lumoz",
+  "interface": {
+    "displayName": "Lumoz"
+  },
+  "plugins": [
+    {
+      "name": "lumoz-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/lumoz-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
