@@ -157,7 +157,7 @@ class ClientIntegrationTests(Invocation, unittest.TestCase):
                 if target == "codex":
                     settings = tomllib.loads((home / "config.toml").read_text())
                     self.assertEqual(settings["mcp_servers"]["lumoz"]["env"], {"LUMOZ_API_KEY": "new-client:new-secret"})
-                    self.assertEqual(settings["mcp_servers"]["lumoz"]["command"], uvx)
+                    self.assertEqual(settings["mcp_servers"]["lumoz"]["command"], str(Path(uvx).resolve()))
                 else:
                     result = original_run([executable, "plugin", "configure", "lumoz-mcp@lumoz", "--json"], capture_output=True, text=True, cwd=directory, check=True)
                     configuration = json.loads(result.stdout)
