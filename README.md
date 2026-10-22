@@ -18,24 +18,6 @@ setup are tested with the CLI; MCP uses private per-user configuration.
 
 ## Codex CLI and app
 
-Install the skills plugin from your terminal:
-
-```sh
-codex plugin marketplace add lumozai/lumoz-plugins
-codex plugin add lumoz-skills@lumoz
-```
-
-Start a new session and ask Codex to use `lumoz-evals`. This is the same skills
-plugin and skill content used by Claude; no API key or Python runtime is needed
-to install the skill. No OpenAI directory approval is required for this route.
-
-In the ChatGPT desktop app, restart the app, open the Plugins Directory in
-Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
-needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
-[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
-GUI installation has not yet been tested. Installing a local plugin does not
-publish it to the universal directory or configure Lumoz tools in cloud Chat.
-
 For skills and MCP together, the packaged installer provides:
 
 ```sh
@@ -61,6 +43,26 @@ To remove only MCP and its saved key without the installer, run
 `codex mcp remove lumoz`. Full uninstall preserves unrelated integrations;
 package caches and API keys in your Lumoz account remain.
 See the [setup guide](docs/setup.md#3-codex-cli-and-codex-app-today).
+
+### Manual alternative: skills only
+
+For skills without an MCP connection, run:
+
+```sh
+codex plugin marketplace add lumozai/lumoz-plugins
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session and ask Codex to use `lumoz-evals`. This is the same skills
+plugin and skill content used by Claude; no API key or Python runtime is needed
+to install the skill. No OpenAI directory approval is required for this route.
+
+In the ChatGPT desktop app, restart the app, open the Plugins Directory in
+Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
+needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
+[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
+GUI installation has not yet been tested. Installing a local plugin does not
+publish it to the universal directory or configure Lumoz tools in cloud Chat.
 
 ## Claude Code
 

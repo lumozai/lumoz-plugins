@@ -65,34 +65,6 @@ never commit a real key. See
 
 ## 3. Codex CLI and Codex app today
 
-### Install the skills plugin
-
-Use a current Codex client with plugin support:
-
-```sh
-codex plugin marketplace add lumozai/lumoz-plugins
-codex plugin add lumoz-skills@lumoz
-```
-
-Start a new session. Open `/plugins` to inspect the package and ask Codex to use
-`lumoz-evals`. The same plugin folder and skill files serve Claude and Codex.
-The skills plugin needs no API key, Python runtime, or MCP plugin installation.
-It does not change your MCP configuration.
-
-Codex CLI 0.163.0 successfully installed the published Claude-format skills
-plugin and discovered `lumoz-skills:lumoz-evals`; this is a tested client
-version, not a claimed minimum. The portable manifest also supports the
-recommended Agent Plugins format. Git marketplace installation requires no
-OpenAI directory approval. For a local checkout, replace the repository name
-with `.` from its root. See [OpenAI's packaging guide](https://developers.openai.com/plugins/build/plugins).
-
-In the ChatGPT desktop app, restart the app, open the Plugins Directory in
-Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
-needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
-[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
-GUI installation has not yet been tested. Installing a local plugin does not
-publish it to the universal directory or configure Lumoz tools in cloud Chat.
-
 ### Install skills and MCP tools together
 
 Install Codex CLI and uv first, then run:
@@ -149,6 +121,34 @@ Restart active sessions to disconnect their running server. Uninstall does
 not revoke the key in Lumoz or erase uv's cache or copies saved elsewhere.
 The old checkout command `python3 scripts/setup_codex.py` is a compatibility
 shim for the combined installer; its uninstall now removes skills as well.
+
+### Manual alternative: install skills only
+
+Use a current Codex client with plugin support:
+
+```sh
+codex plugin marketplace add lumozai/lumoz-plugins
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session. Open `/plugins` to inspect the package and ask Codex to use
+`lumoz-evals`. The same plugin folder and skill files serve Claude and Codex.
+The skills plugin needs no API key, Python runtime, or MCP plugin installation.
+It does not change your MCP configuration.
+
+Codex CLI 0.163.0 successfully installed the published Claude-format skills
+plugin and discovered `lumoz-skills:lumoz-evals`; this is a tested client
+version, not a claimed minimum. The portable manifest also supports the
+recommended Agent Plugins format. Git marketplace installation requires no
+OpenAI directory approval. For a local checkout, replace the repository name
+with `.` from its root. See [OpenAI's packaging guide](https://developers.openai.com/plugins/build/plugins).
+
+In the ChatGPT desktop app, restart the app, open the Plugins Directory in
+Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
+needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
+[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
+GUI installation has not yet been tested. Installing a local plugin does not
+publish it to the universal directory or configure Lumoz tools in cloud Chat.
 
 ### Manual alternative: forward a key from your environment
 
