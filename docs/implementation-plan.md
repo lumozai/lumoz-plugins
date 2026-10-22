@@ -61,7 +61,7 @@ skill. The root repository is no longer an installable plugin.
   Failure checks cover invalid keys, missing uvx, hidden-input availability,
   error redaction, and command timeouts. Wheel checks cover package boundaries
   and execution outside a source checkout. CI runs installer tests on Linux,
-  Windows, and macOS; only Linux was verified locally. Live API access remains
+  Windows, and macOS. Live API access remains
   unverified.
 - Release tag-to-component/version validation, selected-asset publication.
 - Successful GitHub workflow publication of all three distributions.
@@ -76,8 +76,8 @@ provenance. `list_apps` is the preferred first read-only API smoke test.
 
 ## Remaining work
 
-1. Configure the `lumoz-setup` PyPI trusted publisher and publish its first
-   tagged release. The new package commands are not live until that succeeds.
+1. Verify customer setup with authenticated API access. The first
+   `lumoz-setup` release is published through its own PyPI trusted publisher.
 2. Test Windows/macOS GUI installation, API-key persistence, restart, and an
    authenticated read. Verify Desktop managed uv support and Cowork separately.
 3. Verify customer upgrade behavior for later component releases. GitHub

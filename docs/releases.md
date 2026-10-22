@@ -127,9 +127,10 @@ signing, and live GUI acceptance tests remain pending.
 
 ## Publish the customer installer
 
-The first `lumoz-setup` release is pending. Customer commands
-`uvx lumoz-setup codex` and `uvx lumoz-setup claude-code` become available
-only after publication. Maintainers can test from a checkout using
+The first release, `lumoz-setup` 0.1.0, is available on
+[PyPI](https://pypi.org/project/lumoz-setup/). Customers run
+`uvx lumoz-setup codex` or `uvx lumoz-setup claude-code`.
+Maintainers can test from a checkout using
 `uvx --from ./installer lumoz-setup codex` (or `claude-code`).
 
 One-time PyPI configuration: register a pending trusted publisher for a new

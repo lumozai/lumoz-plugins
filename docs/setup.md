@@ -95,15 +95,14 @@ publish it to the universal directory or configure Lumoz tools in cloud Chat.
 
 ### Install skills and MCP tools together
 
-Install Codex CLI and uv first. After the first `lumoz-setup` PyPI release:
+Install Codex CLI and uv first, then run:
 
 ```sh
 uvx lumoz-setup codex
 ```
 
-The installer is currently prepared for release. Maintainers can test it from
-the repository root with `uvx --from ./installer lumoz-setup codex`. Customers
-will not need a checkout or build tooling after the package is published.
+The installer is available on [PyPI](https://pypi.org/project/lumoz-setup/).
+No repository checkout or build tooling is required.
 
 Setup checks the client, prompts for your full `client_id:client_secret` key
 with hidden input, adds the Lumoz marketplace if missing, and installs
@@ -257,7 +256,7 @@ manually installed MCPB files need a new installation for each update.
 
 ### Packaged CLI setup
 
-After the first `lumoz-setup` PyPI release, run:
+Run:
 
 ```sh
 uvx lumoz-setup claude-code
@@ -276,9 +275,7 @@ marketplace declaration from user scope. Claude manages credential deletion
 and retains settings if another scope still uses the plugin. Other scopes,
 other integrations, uv's package cache, and API keys in Lumoz remain.
 
-Before publication, test with `uvx --from ./installer lumoz-setup claude-code`
-from this repository root. The manual plugin route below remains available.
-
+The manual plugin route below remains available.
 
 The `lumoz` marketplace lists two independently versioned plugins:
 `lumoz-skills` supplies the eval skill with no MCP connection or credential

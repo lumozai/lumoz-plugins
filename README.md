@@ -42,10 +42,8 @@ For skills and MCP together, the packaged installer provides:
 uvx lumoz-setup codex
 ```
 
-**Release preparation:** `lumoz-setup` has not been published to PyPI yet. The
-command above becomes available after its first release. Maintainers can test
-it with `uvx --from ./installer lumoz-setup codex` from this repository root.
-Customers will not need to clone this repository.
+Requires Codex CLI and uv. The installer is available on
+[PyPI](https://pypi.org/project/lumoz-setup/); no repository checkout is needed.
 
 Setup adds the marketplace, installs the skills plugin, and saves the pinned
 MCP connection and API key in private Codex `config.toml`. Input is hidden;
@@ -75,8 +73,7 @@ uvx lumoz-setup claude-code
 uvx lumoz-setup claude-code uninstall
 ```
 
-This also awaits the first `lumoz-setup` PyPI release. For local testing use
-`uvx --from ./installer lumoz-setup claude-code`. Requires Claude Code with
+Requires uv and Claude Code with
 `plugin configure --values-stdin` support (2.1.285+). Credentials are saved by
 Claude's supported plugin configuration command. Other installation scopes
 are preserved, and Claude retains credentials if another scope still uses
