@@ -104,7 +104,7 @@ class InstallerTests(Invocation, unittest.TestCase):
         defaults = json.loads((ROOT / "installer/src/lumoz_setup/defaults.json").read_text())
         metadata = json.loads((ROOT / "plugin-source/metadata.json").read_text())
         self.assertEqual(defaults["server"], f"{metadata['mcp']['package']}=={metadata['mcp']['version']}")
-        self.assertEqual((ROOT / "installer/LICENSE").read_bytes(), (ROOT / "LICENSE").read_bytes().rstrip(b"\n") + b"\n")
+        self.assertEqual((ROOT / "installer/LICENSE").read_text(), (ROOT / "LICENSE").read_text().rstrip("\n") + "\n")
 
 
 class ClientIntegrationTests(Invocation, unittest.TestCase):
