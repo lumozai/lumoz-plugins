@@ -1,7 +1,7 @@
 # Setup guide
 
-Sections 1–4 configure MCP tools and the Codex skills plugin in section 3.
-Section 5 installs the separate Claude skills and CLI MCP plugins. The hosted
+Sections 2–3 use `lumoz-setup` for Claude Code and Codex. Sections 4–5 cover
+Desktop tools and skills. Manual alternatives are in section 9. The hosted
 endpoint in section 6 is still planned.
 
 ## 1. Prerequisites
@@ -19,49 +19,39 @@ endpoint in section 6 is still planned.
 Install the server from PyPI. No GitHub credentials or server source checkout
 are needed.
 
-Check the runtime:
-
-```sh
-uv --version
-uvx --version
-uvx --from lumoz-mcp python -c "from importlib.metadata import version; print(version('lumoz-mcp'))"
-```
-
-The last command downloads/caches dependencies and prints the installed
-server version. It checks package availability, not authentication or a
-working MCP connection. Manual examples below use the unpinned PyPI package;
-Codex setup, plugin builds, and extension builds use the tested pin in
-[release metadata](../plugin-source/metadata.json).
-
 Use the production API default unless Lumoz has given you a different API
 root. `LUMOZ_API_URL` names the REST API, not a hosted MCP endpoint. Do not put
 an app ID or environment in the API URL.
 
 ## 2. Claude Code CLI today
 
-For Bash, read the key without saving the literal value in shell history:
+Run:
 
-```bash
-read -rsp 'Lumoz API key: ' LUMOZ_API_KEY
-printf '\n'
-export LUMOZ_API_KEY
-claude mcp add --transport stdio --scope user lumoz -- uvx lumoz-mcp
-claude
+```sh
+uvx lumoz-setup claude-code
 ```
 
-In Claude Code, open `/mcp`, check the `lumoz` connection, then ask:
+Requires uv and Claude Code 2.1.285+.
+Install adds the marketplace and both Lumoz plugins at user scope, then prompts
+privately for the key and saves it with the absolute uvx path through Claude's
+plugin configuration command. The key is sent through stdin, not as a command
+argument. Existing installations are kept; rerunning setup replaces the key.
+Restart Claude Code, open `/mcp`, and ask:
 
-> Use Lumoz to list all apps and environments I can access. Do not modify anything.
+> Use Lumoz to list the apps and environments I can access. Do not modify anything.
 
-Keep launching Claude from an environment containing the key. The registration
-above saves the command, not the exported key. A new terminal needs the key
-again, or a suitable local secret-manager integration. A `.env` file by itself
-does not configure this server.
+To uninstall:
 
-User scope makes the command available across projects on this machine.
-Use project scope only when intentionally sharing command configuration, and
-never commit a real key. See
-[Claude's MCP documentation](https://code.claude.com/docs/en/mcp) for host configuration.
+```sh
+uvx lumoz-setup claude-code uninstall
+```
+
+Uninstall removes both plugins from user scope and removes the unused
+marketplace declaration from user scope. Claude manages credential deletion
+and retains settings if another scope still uses the plugin. Other scopes,
+other integrations, uv's package cache, and API keys in Lumoz remain.
+
+Prefer manual setup? See [Manual Claude Code setup](#manual-claude-code-setup).
 
 ## 3. Codex CLI and Codex app today
 
@@ -86,9 +76,8 @@ piping keys into setup is not supported.
 
 The installer is a separate package, not a `lumoz-mcp` server subcommand.
 It includes its tested server pin, so it reads no files from a checkout.
-An existing marketplace named `lumoz` keeps its configured source; if it
-points to an old repository, remove it first with
-`codex plugin marketplace remove lumoz`, then rerun setup.
+An existing marketplace named `lumoz` keeps its configured source. See
+[manual setup](#manual-codex-setup) if it points to an old repository.
 
 Rerunning setup keeps existing installed plugins and replaces the complete
 `lumoz` MCP entry, including its key and custom settings. Other integrations
@@ -114,137 +103,23 @@ uvx lumoz-setup codex uninstall
 ```
 
 This removes the MCP entry and saved key, uninstalls `lumoz-skills@lumoz`, and
-removes the marketplace if no remaining plugins use it. To remove only MCP
-without uv or the installer, run `codex mcp remove lumoz`.
+removes the marketplace if no remaining plugins use it.
 
 Restart active sessions to disconnect their running server. Uninstall does
 not revoke the key in Lumoz or erase uv's cache or copies saved elsewhere.
-The old checkout command `python3 scripts/setup_codex.py` is a compatibility
-shim for the combined installer; its uninstall now removes skills as well.
 
-### Manual alternative: install skills only
-
-Use a current Codex client with plugin support:
-
-```sh
-codex plugin marketplace add lumozai/lumoz-plugins
-codex plugin add lumoz-skills@lumoz
-```
-
-Start a new session. Open `/plugins` to inspect the package and ask Codex to use
-`lumoz-evals`. The same plugin folder and skill files serve Claude and Codex.
-The skills plugin needs no API key, Python runtime, or MCP plugin installation.
-It does not change your MCP configuration.
-
-Codex CLI 0.163.0 successfully installed the published Claude-format skills
-plugin and discovered `lumoz-skills:lumoz-evals`; this is a tested client
-version, not a claimed minimum. The portable manifest also supports the
-recommended Agent Plugins format. Git marketplace installation requires no
-OpenAI directory approval. For a local checkout, replace the repository name
-with `.` from its root. See [OpenAI's packaging guide](https://developers.openai.com/plugins/build/plugins).
-
-In the ChatGPT desktop app, restart the app, open the Plugins Directory in
-Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
-needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
-[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
-GUI installation has not yet been tested. Installing a local plugin does not
-publish it to the universal directory or configure Lumoz tools in cloud Chat.
-
-### Manual alternative: forward a key from your environment
-
-In your private `~/.codex/config.toml`, merge this table with existing settings:
-
-```toml
-[mcp_servers.lumoz]
-command = "uvx"
-args = ["lumoz-mcp"]
-env_vars = ["LUMOZ_API_KEY"]
-startup_timeout_sec = 60
-```
-
-For the CLI, read/export the key as in section 2, then run:
-
-```sh
-codex mcp list
-codex
-```
-
-Open `/mcp` and run the same app-discovery prompt. `codex mcp list` confirms
-registration; a successful tool call confirms API access.
-
-For the app, open MCP server settings, add a stdio server with the same command
-and arguments, and restart the connection. Local Codex clients on the same host
-share configuration. A GUI launched from the operating system may not inherit
-your terminal's exported variables or PATH.
-
-If the app cannot inherit the key, use its supported credential/environment
-configuration. A manual fallback is a private per-user TOML entry:
-
-```toml
-[mcp_servers.lumoz.env]
-LUMOZ_API_KEY = "REPLACE_WITH_CLIENT_ID:CLIENT_SECRET"
-```
-
-In that fallback, remove `LUMOZ_API_KEY` from `env_vars` to avoid conflicting
-sources. The key is stored as plaintext in the configuration: keep the file
-private, outside source control. On macOS/Linux, `chmod 600 ~/.codex/config.toml`
-restricts file permissions. Use your OS's file permissions on Windows.
-
-If needed, replace `command = "uvx"` with the absolute executable path returned
-by `command -v uvx` on macOS/Linux or `where.exe uvx` on Windows.
-This config applies to local execution; it does not register a browser-chat
-connector. [OpenAI MCP configuration](https://developers.openai.com/codex/mcp).
-
-
-### Update or remove
-
-To refresh the marketplace and install the current skills version:
-
-```sh
-codex plugin marketplace upgrade lumoz
-codex plugin add lumoz-skills@lumoz
-```
-
-Start a new session afterward. To remove the skills plugin:
-
-```sh
-codex plugin remove lumoz-skills@lumoz
-```
-
-These operations preserve your manual MCP configuration and key. To remove MCP
-separately, run `codex mcp remove lumoz`.
+Prefer manual setup? See [Manual Codex setup](#manual-codex-setup).
 
 ## 4. Claude Desktop Chat today
 
-Open **Settings → Developer → Edit Config**. Merge the following into
-`claude_desktop_config.json`; preserve other servers:
-
-```json
-{
-  "mcpServers": {
-    "lumoz": {
-      "command": "uvx",
-      "args": ["lumoz-mcp"],
-      "env": {
-        "LUMOZ_API_KEY": "REPLACE_WITH_CLIENT_ID:CLIENT_SECRET"
-      }
-    }
-  }
-}
-```
-
-Use an absolute `uvx` path if necessary. Fully quit and reopen Claude Desktop,
-check the tools/connector menu, and run the discovery prompt. This manual
-configuration stores the key in a local file; keep it private.
-
-This is the Desktop **Chat** integration. As an alternative to editing JSON,
+For the Desktop **Chat** integration,
 [download `lumoz.mcpb`](https://github.com/lumozai/lumoz-plugins/releases/latest/download/lumoz.mcpb).
-To build from source, use `python3 scripts/build_mcpb.py`. In a current
-Claude Desktop with MCPB 0.4/uv support, open **Settings → Extensions → Advanced
+In a current Claude Desktop with MCPB 0.4/uv support, open **Settings → Extensions → Advanced
 settings → Install Extension…**, select that file, and enter the full API key
 in the extension form. The sensitive field uses Desktop's OS credential storage.
 The managed runtime downloads Python and the pinned PyPI package as needed.
-Choose either the extension or the manual entry to avoid duplicate tools.
+For JSON configuration, see [Manual Desktop MCP setup](#manual-desktop-mcp-setup).
+Choose one connection to avoid duplicate tools.
 
 The MCPB installs tools; the plugin in section 5 supplies the eval skill.
 The trial is unsigned. Windows/macOS GUI installation and authenticated API
@@ -254,62 +129,8 @@ manually installed MCPB files need a new installation for each update.
 
 ## 5. Claude plugin installation
 
-### Packaged CLI setup
-
-Run:
-
-```sh
-uvx lumoz-setup claude-code
-uvx lumoz-setup claude-code uninstall
-```
-
-Requires uv and Claude Code 2.1.285+ for `plugin configure --values-stdin`.
-Install adds the marketplace and both Lumoz plugins at user scope, then prompts
-privately for the key and saves it with the absolute uvx path through Claude's
-plugin configuration command. The key is sent through stdin, not as a command
-argument. Existing installations are kept; rerunning setup replaces the key.
-Restart Claude Code and verify with the read-only app-discovery prompt above.
-
-Uninstall removes both plugins from user scope and removes the unused
-marketplace declaration from user scope. Claude manages credential deletion
-and retains settings if another scope still uses the plugin. Other scopes,
-other integrations, uv's package cache, and API keys in Lumoz remain.
-
-The manual plugin route below remains available.
-
-The `lumoz` marketplace lists two independently versioned plugins:
-`lumoz-skills` supplies the eval skill with no MCP connection or credential
-settings; `lumoz-mcp` configures tools for Claude Code with no skills.
-
-### Claude Code
-
-To try a checkout, run from its root:
-
-```sh
-claude plugin marketplace add .
-claude plugin install lumoz-skills@lumoz
-claude plugin install lumoz-mcp@lumoz
-claude
-```
-
-Install inside Claude Code:
-
-```text
-/plugin marketplace add lumozai/lumoz-plugins
-/plugin install lumoz-skills@lumoz
-/plugin install lumoz-mcp@lumoz
-/plugin configure lumoz-mcp@lumoz
-```
-
-Enter the full API key in the sensitive setting. If needed, use an absolute
-path for the optional `uvx_path` setting. Restart, then check `/mcp` for
-`lumoz-mcp:lumoz`. The skill is `/lumoz-skills:lumoz-evals`. Install uv/Python
-first as described in section 1. Choose either this MCP plugin or direct MCP
-registration; keeping both produces duplicate tools.
-
-Enable marketplace auto-update under **/plugin → Marketplaces → lumoz**.
-To uninstall, use `/plugin uninstall lumoz-skills@lumoz` and/or
-`/plugin uninstall lumoz-mcp@lumoz`.
+For Claude Code skills and MCP together, use [section 2](#2-claude-code-cli-today).
+For plugin commands, see [Manual Claude Code setup](#manual-claude-code-setup).
 
 ### Desktop skills and Cowork
 
@@ -340,7 +161,8 @@ in the same client when replacing them.
 
 ### Codex
 
-Install `lumoz-skills` using the commands in section 3. The Codex marketplace
+Install skills and MCP together using section 3, or follow
+[manual Codex setup](#manual-codex-setup) for skills alone. The Codex marketplace
 lists the same skills folder as Claude's catalog, with one canonical skill and
 one shared skills version. Its root `plugin.json` provides the portable format;
 Codex also accepts the existing `.claude-plugin/plugin.json`. Configure MCP
@@ -418,3 +240,202 @@ pin and a new distribution version in release metadata. To uninstall direct inte
 --scope user` or `codex mcp remove lumoz`; remove Desktop JSON entries through
 the configuration editor. Remove installed plugins through each client's
 plugin manager, and revoke unused Lumoz keys separately.
+
+## 9. Manual setup alternatives
+
+These routes configure clients directly. Check the runtime first:
+
+```sh
+uv --version
+uvx --version
+uvx --from lumoz-mcp python -c "from importlib.metadata import version; print(version('lumoz-mcp'))"
+```
+
+The last command downloads/caches dependencies and prints the installed
+server version. It checks package availability, not authentication or a
+working MCP connection. Manual examples use the unpinned PyPI package;
+Codex setup, plugin builds, and extension builds use the tested pin in
+[release metadata](../plugin-source/metadata.json).
+
+### Manual Claude Code setup
+
+The `lumoz` marketplace lists two independently versioned plugins:
+`lumoz-skills` supplies the eval skill with no MCP connection or credential
+settings; `lumoz-mcp` configures tools for Claude Code with no skills.
+
+To try a checkout, run from its root:
+
+```sh
+claude plugin marketplace add .
+claude plugin install lumoz-skills@lumoz
+claude plugin install lumoz-mcp@lumoz
+claude
+```
+
+Install inside Claude Code:
+
+```text
+/plugin marketplace add lumozai/lumoz-plugins
+/plugin install lumoz-skills@lumoz
+/plugin install lumoz-mcp@lumoz
+/plugin configure lumoz-mcp@lumoz
+```
+
+Enter the full API key in the sensitive setting. If needed, use an absolute
+path for the optional `uvx_path` setting. Restart, then check `/mcp` for
+`lumoz-mcp:lumoz`. The skill is `/lumoz-skills:lumoz-evals`. Install uv/Python
+first as described in section 1. Choose either this MCP plugin or direct MCP
+registration; keeping both produces duplicate tools.
+
+Enable marketplace auto-update under **/plugin → Marketplaces → lumoz**.
+To uninstall, use `/plugin uninstall lumoz-skills@lumoz` and/or
+`/plugin uninstall lumoz-mcp@lumoz`.
+
+#### Direct Claude MCP registration
+
+For Bash, read the key without saving the literal value in shell history:
+
+```bash
+read -rsp 'Lumoz API key: ' LUMOZ_API_KEY
+printf '\n'
+export LUMOZ_API_KEY
+claude mcp add --transport stdio --scope user lumoz -- uvx lumoz-mcp
+claude
+```
+
+In Claude Code, open `/mcp`, check the `lumoz` connection, then ask:
+
+> Use Lumoz to list all apps and environments I can access. Do not modify anything.
+
+Keep launching Claude from an environment containing the key. The registration
+above saves the command, not the exported key. A new terminal needs the key
+again, or a suitable local secret-manager integration. A `.env` file by itself
+does not configure this server.
+
+User scope makes the command available across projects on this machine.
+Use project scope only when intentionally sharing command configuration, and
+never commit a real key. See
+[Claude's MCP documentation](https://code.claude.com/docs/en/mcp) for host configuration.
+
+### Manual Codex setup
+
+If marketplace `lumoz` points to an old repository, remove it with
+`codex plugin marketplace remove lumoz` before adding the current source.
+
+#### Skills only
+
+Use a current Codex client with plugin support:
+
+```sh
+codex plugin marketplace add lumozai/lumoz-plugins
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session. Open `/plugins` to inspect the package and ask Codex to use
+`lumoz-evals`. The same plugin folder and skill files serve Claude and Codex.
+The skills plugin needs no API key, Python runtime, or MCP plugin installation.
+It does not change your MCP configuration.
+
+Codex CLI 0.163.0 successfully installed the published Claude-format skills
+plugin and discovered `lumoz-skills:lumoz-evals`; this is a tested client
+version, not a claimed minimum. The portable manifest also supports the
+recommended Agent Plugins format. Git marketplace installation requires no
+OpenAI directory approval. For a local checkout, replace the repository name
+with `.` from its root. See [OpenAI's packaging guide](https://developers.openai.com/plugins/build/plugins).
+
+In the ChatGPT desktop app, restart the app, open the Plugins Directory in
+Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
+needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
+[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
+GUI installation has not yet been tested. Installing a local plugin does not
+publish it to the universal directory or configure Lumoz tools in cloud Chat.
+
+#### Manual Codex MCP connection
+
+In your private `~/.codex/config.toml`, merge this table with existing settings:
+
+```toml
+[mcp_servers.lumoz]
+command = "uvx"
+args = ["lumoz-mcp"]
+env_vars = ["LUMOZ_API_KEY"]
+startup_timeout_sec = 60
+```
+
+For the CLI, read/export the key as in [Direct Claude MCP registration](#direct-claude-mcp-registration), then run:
+
+```sh
+codex mcp list
+codex
+```
+
+Open `/mcp` and run the same app-discovery prompt. `codex mcp list` confirms
+registration; a successful tool call confirms API access.
+
+For the app, open MCP server settings, add a stdio server with the same command
+and arguments, and restart the connection. Local Codex clients on the same host
+share configuration. A GUI launched from the operating system may not inherit
+your terminal's exported variables or PATH.
+
+If the app cannot inherit the key, use its supported credential/environment
+configuration. A manual fallback is a private per-user TOML entry:
+
+```toml
+[mcp_servers.lumoz.env]
+LUMOZ_API_KEY = "REPLACE_WITH_CLIENT_ID:CLIENT_SECRET"
+```
+
+In that fallback, remove `LUMOZ_API_KEY` from `env_vars` to avoid conflicting
+sources. The key is stored as plaintext in the configuration: keep the file
+private, outside source control. On macOS/Linux, `chmod 600 ~/.codex/config.toml`
+restricts file permissions. Use your OS's file permissions on Windows.
+
+If needed, replace `command = "uvx"` with the absolute executable path returned
+by `command -v uvx` on macOS/Linux or `where.exe uvx` on Windows.
+This config applies to local execution; it does not register a browser-chat
+connector. [OpenAI MCP configuration](https://developers.openai.com/codex/mcp).
+
+
+#### Update or remove
+
+To refresh the marketplace and install the current skills version:
+
+```sh
+codex plugin marketplace upgrade lumoz
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session afterward. To remove the skills plugin:
+
+```sh
+codex plugin remove lumoz-skills@lumoz
+```
+
+These operations preserve your manual MCP configuration and key. To remove MCP
+separately, run `codex mcp remove lumoz`.
+
+The old checkout command `python3 scripts/setup_codex.py` is a compatibility
+shim for combined skills/MCP setup; its uninstall removes skills too.
+
+### Manual Desktop MCP setup
+
+Open **Settings → Developer → Edit Config**. Merge the following into
+`claude_desktop_config.json`; preserve other servers:
+
+```json
+{
+  "mcpServers": {
+    "lumoz": {
+      "command": "uvx",
+      "args": ["lumoz-mcp"],
+      "env": {
+        "LUMOZ_API_KEY": "REPLACE_WITH_CLIENT_ID:CLIENT_SECRET"
+      }
+    }
+  }
+}
+```
+
+Use an absolute `uvx` path if necessary. Fully quit and reopen Claude Desktop,
+check the tools/connector menu, and run the discovery prompt. This manual
+configuration stores the key in a local file; keep it private.

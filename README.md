@@ -16,6 +16,31 @@ the server pin. No server source checkout is needed. Public listings and
 Windows/macOS GUI verification are pending. Codex skills installation and MCP
 setup are tested with the CLI; MCP uses private per-user configuration.
 
+## Claude Code
+
+The installer registers the marketplace, installs both Lumoz plugins, and
+prompts privately for your API key:
+
+```sh
+uvx lumoz-setup claude-code
+```
+
+Requires uv and Claude Code 2.1.285+. Credentials are saved by
+Claude's supported plugin configuration command. Other installation scopes
+are preserved, and Claude retains credentials if another scope still uses
+that plugin.
+
+Restart Claude Code, open `/mcp`, and ask Lumoz to list the apps and
+environments you can access.
+
+To remove both plugins, their user-scope configuration, and unused marketplace:
+
+```sh
+uvx lumoz-setup claude-code uninstall
+```
+
+Prefer manual setup? See [Manual Claude Code setup](#manual-claude-code-setup).
+
 ## Codex CLI and app
 
 For skills and MCP together, the packaged installer provides:
@@ -39,68 +64,11 @@ Uninstall skills, MCP, and the unused marketplace with:
 uvx lumoz-setup codex uninstall
 ```
 
-To remove only MCP and its saved key without the installer, run
-`codex mcp remove lumoz`. Full uninstall preserves unrelated integrations;
+Full uninstall preserves unrelated integrations;
 package caches and API keys in your Lumoz account remain.
 See the [setup guide](docs/setup.md#3-codex-cli-and-codex-app-today).
 
-### Manual alternative: skills only
-
-For skills without an MCP connection, run:
-
-```sh
-codex plugin marketplace add lumozai/lumoz-plugins
-codex plugin add lumoz-skills@lumoz
-```
-
-Start a new session and ask Codex to use `lumoz-evals`. This is the same skills
-plugin and skill content used by Claude; no API key or Python runtime is needed
-to install the skill. No OpenAI directory approval is required for this route.
-
-In the ChatGPT desktop app, restart the app, open the Plugins Directory in
-Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
-needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
-[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
-GUI installation has not yet been tested. Installing a local plugin does not
-publish it to the universal directory or configure Lumoz tools in cloud Chat.
-
-## Claude Code
-
-The packaged installer uses the same hidden key prompt and also registers
-both plugins:
-
-```sh
-uvx lumoz-setup claude-code
-# Remove both plugins, their user-scope configuration, and unused marketplace:
-uvx lumoz-setup claude-code uninstall
-```
-
-Requires uv and Claude Code with
-`plugin configure --values-stdin` support (2.1.285+). Credentials are saved by
-Claude's supported plugin configuration command. Other installation scopes
-are preserved, and Claude retains credentials if another scope still uses
-that plugin.
-
-The existing manual route remains available. Run inside Claude Code:
-
-```text
-/plugin marketplace add lumozai/lumoz-plugins
-/plugin install lumoz-skills@lumoz
-/plugin install lumoz-mcp@lumoz
-/plugin configure lumoz-mcp@lumoz
-```
-
-Enter the full Lumoz API key (`client_id:client_secret`). Install
-[uv](https://docs.astral.sh/uv/getting-started/installation/) and Python 3.11+
-first. Set the plugin's **uvx executable** to its absolute path if needed.
-Restart the session and check `/mcp`: the connection is `lumoz-mcp:lumoz`.
-The skill is `/lumoz-skills:lumoz-evals`.
-
-To try a checkout, run `claude plugin marketplace add .` from its root, then
-`claude plugin install lumoz-skills@lumoz` and
-`claude plugin install lumoz-mcp@lumoz`. Configure the key in Claude Code.
-Enable marketplace auto-update under **/plugin → Marketplaces → lumoz**;
-third-party marketplace auto-update is off by default.
+Prefer manual setup? See [Manual Codex setup](#manual-codex-setup).
 
 ## Claude Desktop
 
@@ -112,11 +80,6 @@ third-party marketplace auto-update is off by default.
    select the downloaded file.
 3. Enter the full API key in the extension form and start a new Chat. Ask:
    **Use Lumoz to list the apps and environments I can access.**
-
-```sh
-# Optional: build the extension from a source checkout
-python3 scripts/build_mcpb.py
-```
 
 This unsigned trial requires Desktop support for MCPB 0.4 and its managed `uv`
 runtime. First launch downloads Python/dependencies as needed. Remove any
@@ -143,6 +106,54 @@ still points to the old server repository or a different checkout, remove that
 marketplace and add `lumozai/lumoz-plugins` instead. Desktop users replace the
 old plugin with **Lumoz Skills** plus the MCPB. Credentials do not migrate
 automatically between these packages.
+
+## Manual setup alternatives
+
+### Manual Claude Code setup
+
+Run inside Claude Code:
+
+```text
+/plugin marketplace add lumozai/lumoz-plugins
+/plugin install lumoz-skills@lumoz
+/plugin install lumoz-mcp@lumoz
+/plugin configure lumoz-mcp@lumoz
+```
+
+Enter the full Lumoz API key (`client_id:client_secret`). Install
+[uv](https://docs.astral.sh/uv/getting-started/installation/) and Python 3.11+
+first. Set the plugin's **uvx executable** to its absolute path if needed.
+Restart the session and check `/mcp`: the connection is `lumoz-mcp:lumoz`.
+The skill is `/lumoz-skills:lumoz-evals`.
+
+To try a checkout, run `claude plugin marketplace add .` from its root, then
+`claude plugin install lumoz-skills@lumoz` and
+`claude plugin install lumoz-mcp@lumoz`. Configure the key in Claude Code.
+Enable marketplace auto-update under **/plugin → Marketplaces → lumoz**;
+third-party marketplace auto-update is off by default.
+
+### Manual Codex setup
+
+For skills without an MCP connection, run:
+
+```sh
+codex plugin marketplace add lumozai/lumoz-plugins
+codex plugin add lumoz-skills@lumoz
+```
+
+Start a new session and ask Codex to use `lumoz-evals`. This is the same skills
+plugin and skill content used by Claude; no API key or Python runtime is needed
+to install the skill. No OpenAI directory approval is required for this route.
+
+In the ChatGPT desktop app, restart the app, open the Plugins Directory in
+Work or Codex, select the Lumoz marketplace, and install **Lumoz Skills** if
+needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
+[documented local-marketplace route](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli);
+GUI installation has not yet been tested. Installing a local plugin does not
+publish it to the universal directory or configure Lumoz tools in cloud Chat.
+
+For MCP configuration and removal, see the
+[manual Codex MCP instructions](docs/setup.md#manual-codex-mcp-connection).
 
 ## Build and release
 
