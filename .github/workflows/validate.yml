@@ -85,10 +85,7 @@ jobs:
 
   installer:
     needs: secrets
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -106,12 +103,10 @@ jobs:
       - name: Test isolated client setup
         run: python -m unittest discover -s tests -p test_installer.py -v
       - name: Build installer sdist and wheel
-        if: runner.os == 'Linux'
         run: |
           python -m build installer --outdir dist/installer
           python scripts/check_installer.py
       - uses: actions/upload-artifact@v4
-        if: runner.os == 'Linux'
         with:
           name: lumoz-setup
           path: dist/installer/*

@@ -60,9 +60,8 @@ skill. The root repository is no longer an installable plugin.
   through real CLIs in isolated profiles preserve unrelated configuration.
   Failure checks cover invalid keys, missing uvx, hidden-input availability,
   error redaction, and command timeouts. Wheel checks cover package boundaries
-  and execution outside a source checkout. CI runs installer tests on Linux,
-  Windows, and macOS. Live API access remains
-  unverified.
+  and execution outside a source checkout. CI runs installer tests on Linux.
+  Live API access remains unverified.
 - Release tag-to-component/version validation, selected-asset publication.
 - Successful GitHub workflow publication of all three distributions.
 - Pre-commit Gitleaks hook, CI history scanning, and repository-wide GitHub

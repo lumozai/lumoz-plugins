@@ -173,7 +173,7 @@ python3 scripts/check_installer.py
 3. Commit the source, generated defaults, and license. Push the release commit.
 4. Tag that commit `lumoz-setup-v<version>` and push the tag. The
    `publish-installer.yml` workflow runs package validation, including isolated
-   setup tests on Linux, Windows, and macOS, then publishes the tested wheel
+   setup tests on Linux, then publishes the tested wheel
    and sdist through PyPI trusted publishing.
 5. Verify the package version on PyPI and run `uvx lumoz-setup@<version> --help`
    outside a checkout. After the first successful release, remove the
