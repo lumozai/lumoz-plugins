@@ -58,7 +58,7 @@ Runtime code lives in `installer/src/lumoz_setup/`; maintainer tooling lives
 in `scripts/`. Runtime defaults and the license are packaged with the wheel;
 no checkout files are read by the installed CLI.
 
-Before the first PyPI release, test from the repository root with:
+To test local changes, run from the repository root:
 
 ```sh
 uvx --from ./installer lumoz-setup --help
