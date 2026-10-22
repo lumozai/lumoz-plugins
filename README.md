@@ -7,7 +7,7 @@ install skills without enabling an unconfigured MCP server.
 | --- | --- | --- |
 | `lumoz-skills` | `lumoz-evals` skill; no MCP or credentials | Claude Desktop, Cowork, Claude Code, Codex CLI/app |
 | `lumoz-mcp` | Pinned stdio server configuration; no skills | Claude Code |
-| Codex setup script | Hidden API-key prompt and pinned stdio server registration | Codex CLI/app |
+| `lumoz-setup` | Marketplace, skills, MCP, hidden key prompt, and uninstall | Codex CLI/app, Claude Code |
 | `lumoz.mcpb` | Desktop MCP extension with API-key form; no skills | Claude Desktop Chat |
 
 **Preview:** MCP packages use a tested server release from PyPI. See
@@ -36,38 +36,53 @@ needed. Start a new conversation and ask it to use `lumoz-evals`. This is the
 GUI installation has not yet been tested. Installing a local plugin does not
 publish it to the universal directory or configure Lumoz tools in cloud Chat.
 
-For MCP tools, run this from a checkout of this repository (requires Python
-3.11+, Codex CLI, and uv):
+For skills and MCP together, the packaged installer provides:
 
 ```sh
-python3 scripts/setup_codex.py
+uvx lumoz-setup codex
 ```
 
-If you do not have a checkout, clone it first with
-`git clone https://github.com/lumozai/lumoz-plugins.git`, then
-`cd lumoz-plugins`. The setup script lives in this public repository; it is
-not a subcommand of the `lumoz-mcp` server or part of the skills plugin.
+**Release preparation:** `lumoz-setup` has not been published to PyPI yet. The
+command above becomes available after its first release. Maintainers can test
+it with `uvx --from ./installer lumoz-setup codex` from this repository root.
+Customers will not need to clone this repository.
 
-Enter the full Lumoz API key (`client_id:client_secret`) at the hidden prompt.
-Setup registers the pinned server and saves the key in your private Codex
-`config.toml` as plaintext; no environment export is needed. Restart Codex and
-check `/mcp`. Running setup again replaces the Lumoz registration and key.
+Setup adds the marketplace, installs the skills plugin, and saves the pinned
+MCP connection and API key in private Codex `config.toml`. Input is hidden;
+the saved key is plaintext. No environment export is required. Rerunning setup
+keeps installed plugins and replaces the entire Lumoz MCP entry and key.
+Restart Codex and check `/mcp`.
 
-To uninstall the MCP connection and delete its saved key:
+Uninstall skills, MCP, and the unused marketplace with:
 
 ```sh
-python3 scripts/setup_codex.py uninstall
-# Or, without this checkout:
-codex mcp remove lumoz
+uvx lumoz-setup codex uninstall
 ```
 
-See the [Codex setup guide](docs/setup.md#3-codex-cli-and-codex-app-today)
-for verification and manual configuration. Skills installation and updates
-do not change the MCP connection.
+To remove only MCP and its saved key without the installer, run
+`codex mcp remove lumoz`. Full uninstall preserves unrelated integrations;
+package caches and API keys in your Lumoz account remain.
+See the [setup guide](docs/setup.md#3-codex-cli-and-codex-app-today).
 
 ## Claude Code
 
-Run inside Claude Code:
+The packaged installer uses the same hidden key prompt and also registers
+both plugins:
+
+```sh
+uvx lumoz-setup claude-code
+# Remove both plugins, their user-scope configuration, and unused marketplace:
+uvx lumoz-setup claude-code uninstall
+```
+
+This also awaits the first `lumoz-setup` PyPI release. For local testing use
+`uvx --from ./installer lumoz-setup claude-code`. Requires Claude Code with
+`plugin configure --values-stdin` support (2.1.285+). Credentials are saved by
+Claude's supported plugin configuration command. Other installation scopes
+are preserved, and Claude retains credentials if another scope still uses
+that plugin.
+
+The existing manual route remains available. Run inside Claude Code:
 
 ```text
 /plugin marketplace add lumozai/lumoz-plugins
@@ -145,7 +160,8 @@ plugins/lumoz-skills/    # Self-contained skills plugin
 plugins/lumoz-mcp/       # Self-contained Claude Code MCP plugin
 mcpb/                   # Desktop manifest, dependency declaration, launcher
 plugin-source/metadata.json
-scripts/
+installer/             # Customer CLI package
+scripts/               # Maintainer build/release tools; legacy setup shim
 docs/
 ```
 
@@ -154,6 +170,7 @@ python3 scripts/build_claude.py --zip
 python3 scripts/build_mcpb.py
 python3 scripts/build_claude.py --check
 python3 scripts/build_mcpb.py --check
+python3 scripts/build_installer.py --check
 python3 -m pip install jsonschema==4.25.1
 python3 scripts/validate_portable.py
 python3 -m unittest discover -s tests -v
@@ -192,6 +209,13 @@ Release asset when its component tag is pushed. Desktop releases are marked
 Latest so the stable Desktop download remains available. No release is
 published by ordinary commits. See [release instructions](docs/releases.md)
 for exact version changes, tags, and publishing boundaries.
+
+The customer installer is an independent Python package in `installer/`.
+Build its wheel and sdist with `uv build installer --out-dir dist/installer`
+and validate with `python3 scripts/check_installer.py`. Its
+`lumoz-setup-v<version>` tag runs a separate PyPI publishing workflow after
+the trusted publisher is configured. See the installer section of the release
+guide before making customer download commands available.
 
 ## Documentation
 

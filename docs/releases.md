@@ -1,7 +1,8 @@
 # Release instructions
 
 The server is released to PyPI from its own repository. This repository
-releases distribution packages; it does not publish or copy the Python server.
+releases distribution packages and the separate `lumoz-setup` installer to
+PyPI; it does not publish or copy the Python server.
 
 ## Version ownership
 
@@ -17,15 +18,17 @@ Edit `plugin-source/metadata.json`, then regenerate the affected files:
 Names are installation identities: keep them stable. The MCPB filename stays
 `lumoz.mcpb`; its internal version and containing release tag identify a release.
 The plugin ZIP filenames include their respective versions. Root `name` is the
-marketplace name, `lumoz`, not a fourth release version.
+marketplace name, `lumoz`, not a release version. The installer has its own
+version in `installer/pyproject.toml`.
 
 Claude and Codex use the same skills folder and version. The generator updates
 the skills plugin's portable and Claude manifests and both marketplace catalogs
 together. No separate Codex skills version or release tag is needed. The MCP
-plugin is for Claude Code; Codex MCP uses the separate `scripts/setup_codex.py`
-installer and private user configuration. The script reads `mcp.version` and
-ships through this repository without a component release tag. Desktop MCPB
-keeps its own version.
+plugin is for Claude Code; the `lumoz-setup` installer handles marketplaces,
+skills, and MCP configuration for both Codex and Claude Code. Its wheel embeds
+the tested server pin generated from `mcp.version`. Desktop MCPB keeps its own
+version. Changing installer code or its embedded pin requires a new installer
+version and PyPI release; installed tools do not update themselves.
 
 ## After a server update
 
@@ -41,8 +44,10 @@ keeps its own version.
 ```sh
 python3 scripts/build_claude.py --zip
 python3 scripts/build_mcpb.py
+python3 scripts/build_installer.py
 python3 scripts/build_claude.py --check
 python3 scripts/build_mcpb.py --check
+python3 scripts/build_installer.py --check
 python3 -m pip install jsonschema==4.25.1
 python3 scripts/validate_portable.py
 python3 -m unittest discover -s tests -v
@@ -98,11 +103,12 @@ python3 scripts/prepare_release.py "lumoz-desktop-v${desktop_version}"
   Codex users refresh with `codex plugin marketplace upgrade lumoz`, reinstall
   `lumoz-skills` using `codex plugin add lumoz-skills@lumoz`, and start a new
   session. Their MCP configuration and saved key are independent of skills updates.
-- Codex MCP users update their checkout with `git pull --ff-only` and rerun
-  `python3 scripts/setup_codex.py` to adopt that checkout's tested server pin.
-  Setup prompts for the key again and replaces the complete `lumoz` MCP entry.
-  A new PyPI release or skills-plugin update alone does not change the saved pin.
-  `codex mcp remove lumoz` removes the registration and its stored key.
+- Installer users run `uvx lumoz-setup@latest codex` or
+  `uvx lumoz-setup@latest claude-code` and enter their key again. Setup keeps
+  existing skills installations; refresh their marketplace separately when
+  updating skills. Codex setup replaces the complete `lumoz` MCP entry.
+  Claude's MCP plugin pin follows its plugin release, not the installer's
+  embedded Codex server pin. Skills updates alone do not change Codex MCP.
 - Anthropic plugin directory submissions track the relevant plugin folder and
   branch/tag, with checks and publishing controls. Submit
   `plugins/lumoz-skills` and `plugins/lumoz-mcp` separately if listing both.
@@ -118,3 +124,59 @@ python3 scripts/prepare_release.py "lumoz-desktop-v${desktop_version}"
 The initial releases of all three components were published successfully through
 the GitHub release workflow. Directory submissions, feed registration,
 signing, and live GUI acceptance tests remain pending.
+
+## Publish the customer installer
+
+The first `lumoz-setup` release is pending. Customer commands
+`uvx lumoz-setup codex` and `uvx lumoz-setup claude-code` become available
+only after publication. Maintainers can test from a checkout using
+`uvx --from ./installer lumoz-setup codex` (or `claude-code`).
+
+One-time PyPI configuration: register a pending trusted publisher for a new
+project named `lumoz-setup` (or a trusted publisher on the existing project),
+with GitHub owner `lumozai`, repository `lumoz-plugins`, workflow filename
+`publish-installer.yml`, and environment `pypi`. Configure the matching GitHub
+Actions environment and its release permissions. This requires a PyPI account
+with ownership rights; no API token is committed to the repository. See
+[PyPI's trusted publishing instructions](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
+
+Use the same PyPI account that owns `lumoz-mcp`. Its publisher trusts
+`lumozai/lumoz-mcp` and `publish-mcp.yml`; that registration does not authorize
+this new project or repository. `lumoz-setup` uses the same OIDC authentication
+method with its own registration. No shared PyPI password or API token is
+needed. Register it under [account Publishing](https://pypi.org/manage/account/publishing/)
+using these exact values:
+
+| Field | Value |
+| --- | --- |
+| PyPI project name | `lumoz-setup` |
+| GitHub owner | `lumozai` |
+| Repository name | `lumoz-plugins` |
+| Workflow filename | `publish-installer.yml` |
+| Environment name | `pypi` |
+
+For each installer release:
+
+1. Update `installer/pyproject.toml`'s version. If adopting a new server pin,
+   update `plugin-source/metadata.json` and regenerate installer defaults too.
+2. Run from the repository root:
+
+```sh
+python3 scripts/build_installer.py
+python3 scripts/build_installer.py --check
+python3 -m unittest discover -s tests -v
+uv build installer --out-dir dist/installer
+python3 scripts/check_installer.py
+```
+
+3. Commit the source, generated defaults, and license. Push the release commit.
+4. Tag that commit `lumoz-setup-v<version>` and push the tag. The
+   `publish-installer.yml` workflow runs package validation, including isolated
+   setup tests on Linux, Windows, and macOS, then publishes the tested wheel
+   and sdist through PyPI trusted publishing.
+5. Verify the package version on PyPI and run `uvx lumoz-setup@<version> --help`
+   outside a checkout. After the first successful release, remove the
+   release-preparation notices from customer documentation.
+
+The installer has a separate tag and publication workflow from the skills,
+Claude MCP plugin, and MCPB distributions. Ordinary pushes do not publish it.

@@ -44,6 +44,7 @@ jobs:
         run: |
           python3 scripts/build_claude.py --check
           python3 scripts/build_mcpb.py --check
+          python3 scripts/build_installer.py --check
       - name: Validate portable plugin schemas
         run: |
           python3 -m pip install jsonschema==4.25.1
@@ -80,4 +81,38 @@ jobs:
         with:
           name: lumoz-desktop-extension
           path: dist/*.mcpb
+          if-no-files-found: error
+
+  installer:
+    needs: secrets
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install tested clients and build tools
+        run: |
+          npm install --global @anthropic-ai/claude-code@2.1.304 @openai/codex@0.163.0
+          python -m pip install build
+      - name: Check defaults and test isolated client setup
+        run: |
+          python scripts/build_installer.py --check
+          python -m unittest discover -s tests -p test_installer.py -v
+      - name: Build installer sdist and wheel
+        if: runner.os == 'Linux'
+        run: |
+          python -m build installer --outdir dist/installer
+          python scripts/check_installer.py
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
+        with:
+          name: lumoz-setup
+          path: dist/installer/*
           if-no-files-found: error

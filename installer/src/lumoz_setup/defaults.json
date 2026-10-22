@@ -1,0 +1,4 @@
+{
+  "marketplace": "lumozai/lumoz-plugins",
+  "server": "lumoz-mcp==0.4.3"
+}

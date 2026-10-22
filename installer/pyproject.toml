@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lumoz-setup"
+version = "0.1.0"
+description = "Set up Lumoz skills and MCP tools in Codex and Claude Code"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{name = "Lumoz AI", email = "support@lumoz.ai"}]
+dependencies = []
+
+[project.urls]
+Homepage = "https://lumoz.ai"
+Repository = "https://github.com/lumozai/lumoz-plugins"
+
+[project.scripts]
+lumoz-setup = "lumoz_setup.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+lumoz_setup = ["defaults.json"]
